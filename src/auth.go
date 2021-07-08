@@ -19,6 +19,8 @@ type Claims struct {
 	Username string `json:"username"`
 	Rolename string `json:"rolename"`
 	Isadmin  bool   `json:"isadmin"`
+	Isstaff  bool   `json:"isstaff"`
+	Phone    int    `json:"phone"`
 	jwt.StandardClaims
 }
 
@@ -57,6 +59,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Username: creds.Username,
 		Rolename: role.Rolename,
 		Isadmin:  role.Isadmin,
+
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),

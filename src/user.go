@@ -10,11 +10,14 @@ type User struct {
 	Username string `json:"username"`
 	Rolename string `json:"rolename"`
 	Isadmin  bool   `json:"isadmin"`
+	Isstaff  bool   `json:"isstaff"`
+	Phone    int    `json:"phone"`
 }
 
 type Role struct {
 	Rolename string
 	Isadmin  bool
+	Isstaff  bool
 }
 
 type AllUsers struct {

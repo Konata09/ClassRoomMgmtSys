@@ -31,14 +31,28 @@ func getUidByUsername(username string) int {
 	return uid
 }
 
+func getPhoneByUid(uid int) int {
+	stmt, err := db.Prepare("select phone from user where uid = ?")
+	if err != nil {
+		return -1
+	}
+	defer stmt.Close()
+	var phone int
+	err = stmt.QueryRow(uid).Scan(&phone)
+	if err != nil {
+		return -1
+	}
+	return phone
+}
+
 func getRoleByUid(uid int) *Role {
-	stmt, err := db.Prepare("select rolename, isadmin from user,role where uid = ? and user.roleid = role.roleid")
+	stmt, err := db.Prepare("select rolename, isadmin, isstaff from user,role where uid = ? and user.roleid = role.roleid")
 	if err != nil {
 		return nil
 	}
 	defer stmt.Close()
 	var role Role
-	err = stmt.QueryRow(uid).Scan(&role.Rolename, &role.Isadmin)
+	err = stmt.QueryRow(uid).Scan(&role.Rolename, &role.Isadmin, &role.Isstaff)
 	if err != nil {
 		return nil
 	}
@@ -87,13 +101,13 @@ func setPasswordByUid(uid int, newPassword string) bool {
 }
 
 func getUserByUid(uid int) *User {
-	stmt, err := db.Prepare("select username, rolename, isadmin from user,role where user.roleid = role.roleid and uid = ?")
+	stmt, err := db.Prepare("select username, rolename, isadmin, isstaff from user,role where user.roleid = role.roleid and uid = ?")
 	if err != nil {
 		return nil
 	}
 	defer stmt.Close()
 	var user User
-	err = stmt.QueryRow(uid).Scan(&user.Username, &user.Rolename, &user.Isadmin)
+	err = stmt.QueryRow(uid).Scan(&user.Username, &user.Rolename, &user.Isadmin, &user.Isstaff)
 	if err != nil {
 		return nil
 	}
@@ -101,7 +115,7 @@ func getUserByUid(uid int) *User {
 }
 
 func getUsers() []User {
-	stmt, err := db.Prepare("select uid, username, rolename, isadmin from user,role where user.roleid = role.roleid")
+	stmt, err := db.Prepare("select uid, username, rolename, isadmin, isstaff from user,role where user.roleid = role.roleid")
 	if err != nil {
 		return nil
 	}
@@ -113,19 +127,19 @@ func getUsers() []User {
 	var users []User
 	for rows.Next() {
 		var user User
-		rows.Scan(&user.Uid, &user.Username, &user.Rolename, &user.Isadmin)
+		rows.Scan(&user.Uid, &user.Username, &user.Rolename, &user.Isadmin, &user.Isstaff)
 		users = append(users, user)
 	}
 	return users
 }
 
-func addUser(username string, password string, roleid int) bool {
-	stmt, err := db.Prepare("insert into user (username, password, roleid) values (?, ?, ?)")
+func addUser(username string, password string, phone int, roleid int) bool {
+	stmt, err := db.Prepare("insert into user (username, password, phone, roleid) values (?, ?, ?, ?)")
 	if err != nil {
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(username, password, roleid)
+	_, err = stmt.Exec(username, password, phone, roleid)
 	if err != nil {
 		return false
 	}
