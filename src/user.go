@@ -35,6 +35,7 @@ type PutUserBody struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Rolename string `json:"rolename"`
+	Phone    int    `json:"phone"`
 }
 
 func UserChangePassword(w http.ResponseWriter, r *http.Request) {
@@ -120,12 +121,12 @@ func SetUser(w http.ResponseWriter, r *http.Request) {
 			ApiErrMsg(w, "用户名已占用")
 			return
 		}
-		//ok := addUser(body.Username, getPasswordMD5(body.Password), roleid)
-		//if ok {
-		//	ApiOk(w)
-		//} else {
-		//	ApiErr(w)
-		//}
+		ok := addUser(body.Username, getPasswordMD5(body.Password), body.Phone, roleid)
+		if ok {
+			ApiOk(w)
+		} else {
+			ApiErr(w)
+		}
 	case "DELETE":
 		var body User
 		err := json.NewDecoder(r.Body).Decode(&body)

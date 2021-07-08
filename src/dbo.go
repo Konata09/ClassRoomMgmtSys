@@ -117,7 +117,7 @@ func getUserByUid(uid int) *User {
 }
 
 func getUsers() []User {
-	stmt, err := db.Prepare("select uid, username, rolename, isadmin, isstaff from user,role where user.roleid = role.roleid")
+	stmt, err := db.Prepare("select uid, username, rolename, isadmin, isstaff, phone from user,role where user.roleid = role.roleid")
 	if err != nil {
 		return nil
 	}
@@ -129,7 +129,7 @@ func getUsers() []User {
 	var users []User
 	for rows.Next() {
 		var user User
-		rows.Scan(&user.Uid, &user.Username, &user.Rolename, &user.Isadmin, &user.Isstaff)
+		rows.Scan(&user.Uid, &user.Username, &user.Rolename, &user.Isadmin, &user.Isstaff, &user.Phone)
 		users = append(users, user)
 	}
 	return users
@@ -509,7 +509,7 @@ func getPreference(name string, value *string) bool {
 	if err != nil {
 		return false
 	}
-	err = stmt.QueryRow(name).Scan(&value)
+	err = stmt.QueryRow(name).Scan(value)
 	if err != nil {
 		return false
 	}

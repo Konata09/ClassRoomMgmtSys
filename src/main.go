@@ -25,7 +25,11 @@ func initDBConn() {
 
 func initSyslog() {
 	var serverAddr string
-	getPreference("syslog_server", &serverAddr)
+	ret := getPreference("syslog_server", &serverAddr)
+	if !ret {
+		log.Fatal("syslog server not configured!")
+	}
+	fmt.Printf("syslog server: %s\n", serverAddr)
 	var err error
 	sysLog, err = syslog.Dial("udp", serverAddr, syslog.LOG_NOTICE|syslog.LOG_USER, "ClassroomMgmtSys")
 	if err != nil {
@@ -50,8 +54,8 @@ func main() {
 	mux.Handle("/api/v2/user/changePassword", VerifyHeader(http.HandlerFunc(UserChangePassword)))
 	mux.Handle("/api/v2/admin/changePassword", VerifyHeader(VerifyAdmin(http.HandlerFunc(AdminChangePassword))))
 	mux.Handle("/api/v2/admin/setUser", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetUser))))
-	mux.Handle("/api/v2/admin/setCommand", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetCommand))))
-	mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDevice))))
+	//mux.Handle("/api/v2/admin/setCommand", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetCommand))))
+	//mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDevice))))
 	//mux.Handle("/api/v2/user/changePhone", VerifyHeader(http.HandlerFunc()))
 	// 返回全部教室和分组 含基本状态
 	//mux.Handle("/api/v2/getRooms", VerifyHeader(http.HandlerFunc()))

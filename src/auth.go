@@ -32,7 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var creds Credentials
 
 	if r.Method != "POST" {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -73,8 +73,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.Host)
-	fmt.Fprintf(sysLog, "%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.Host)
+	fmt.Printf("%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.RemoteAddr)
+	fmt.Fprintf(sysLog, "%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.RemoteAddr)
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",
@@ -148,6 +148,10 @@ func getUserInfoFromJWT(r *http.Request) *User {
 }
 
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	re := regexp.MustCompile(`Bearer\s(.*)$`)
 	headerAuth := r.Header.Get("Authorization")
 	if len(headerAuth) == 0 {
@@ -170,8 +174,8 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var body struct {
-		Username string `json:"username,omitempty"`
-		Uid      int    `json:"uid,omitempty"`
+		Username string `json:"username"`
+		Uid      int    `json:"uid"`
 	}
 	err = json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -184,6 +188,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	//	ApiErrMsg(w, "Token not expires in 4 day")
 	//	return
 	//}
+
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims.ExpiresAt = expirationTime.Unix()
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -192,8 +197,8 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%s Token refresh success: %d %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.Host)
-	fmt.Fprintf(sysLog, "%s Token refresh success: %d %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.Host)
+	fmt.Printf("%s Token refresh success: uid: %d username: %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.RemoteAddr)
+	fmt.Fprintf(sysLog, "%s Token refresh success: uid: %d username: %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.RemoteAddr)
 
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
@@ -205,7 +210,9 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+	// TODO: JWT 在服务端不好实现无效化
+	ApiOk(w)
 }
