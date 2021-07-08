@@ -15,9 +15,9 @@ type User struct {
 }
 
 type Role struct {
-	Rolename string
-	Isadmin  bool
-	Isstaff  bool
+	Rolename string `json:"rolename"`
+	Isadmin  bool   `json:"isadmin"`
+	Isstaff  bool   `json:"isstaff"`
 }
 
 type AllUsers struct {
@@ -27,8 +27,8 @@ type AllUsers struct {
 
 type ChangePasswordBody struct {
 	Uid     int    `json:"uid"`
-	OldPass string `json:"oldpass"`
-	NewPass string `json:"newpass"`
+	OldPass string `json:"old_pass"`
+	NewPass string `json:"new_pass"`
 }
 
 type PutUserBody struct {

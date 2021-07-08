@@ -8,8 +8,6 @@ import (
 type UserDevice struct {
 	DeviceId   int    `json:"id"`
 	DeviceName string `json:"name"`
-	DeviceUdp  bool   `json:"udp"`
-	DeviceWol  bool   `json:"wol"`
 }
 
 type DeviceList struct {

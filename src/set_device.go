@@ -12,9 +12,8 @@ type Device struct {
 	DeviceName    string `json:"name"`
 	DeviceIp      string `json:"ip"`
 	DeviceMac     string `json:"mac"`
-	DeviceUdp     bool   `json:"udp"`
-	DeviceWol     bool   `json:"wol"`
-	DeviceSubmask int    `json:"submask"`
+	DeviceTypeId  int    `json:"device_type_id"`
+	DeviceClassId int    `json:"device_class_id"`
 }
 
 type AllDevices struct {

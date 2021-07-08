@@ -1,6 +1,8 @@
 package main
 
-import "reflect"
+import (
+	"reflect"
+)
 
 func getUidByUsernameAndPassword(username string, password string) int {
 	passwordMD5 := getPasswordMD5(password)
@@ -252,7 +254,7 @@ func setCommand(commandId int, commandName string, commandValue string, commandP
 }
 
 func getDevices() []Device {
-	stmt, err := db.Prepare("select id, name, ip, mac, udp, wol, submask from device")
+	stmt, err := db.Prepare("select device.id, name, ip, mac, typeid, classid from device, devicetype where device.typeid = devicetype.id")
 	if err != nil {
 		return nil
 	}
@@ -264,7 +266,7 @@ func getDevices() []Device {
 	var devices []Device
 	for rows.Next() {
 		var device Device
-		rows.Scan(&device.DeviceId, &device.DeviceName, &device.DeviceIp, &device.DeviceMac, &device.DeviceUdp, &device.DeviceWol, &device.DeviceSubmask)
+		rows.Scan(&device.DeviceId, &device.DeviceName, &device.DeviceIp, &device.DeviceMac, &device.DeviceTypeId, &device.DeviceClassId)
 		device.DeviceMac = trimMACtoShow(device.DeviceMac)
 		devices = append(devices, device)
 	}
@@ -272,7 +274,7 @@ func getDevices() []Device {
 }
 
 func getUserDevices() []UserDevice {
-	stmt, err := db.Prepare("select id, name, udp, wol from device")
+	stmt, err := db.Prepare("select device.id, name from device, devicetype where typeid = devicetype.id")
 	if err != nil {
 		return nil
 	}
@@ -284,20 +286,20 @@ func getUserDevices() []UserDevice {
 	var devices []UserDevice
 	for rows.Next() {
 		var device UserDevice
-		rows.Scan(&device.DeviceId, &device.DeviceName, &device.DeviceUdp, &device.DeviceWol)
+		rows.Scan(&device.DeviceId, &device.DeviceName)
 		devices = append(devices, device)
 	}
 	return devices
 }
 
 func getDeviceById(deviceId int) *Device {
-	stmt, err := db.Prepare("select name, ip, mac, udp, wol, submask from device where id = ?")
+	stmt, err := db.Prepare("select name, ip, mac, typeid, classid from device, devicetype where device.typeid = devicetype.id and device.id = ?")
 	if err != nil {
 		return nil
 	}
 	defer stmt.Close()
 	var device Device
-	err = stmt.QueryRow(deviceId).Scan(&device.DeviceName, &device.DeviceIp, &device.DeviceMac, &device.DeviceUdp, &device.DeviceWol, &device.DeviceSubmask)
+	err = stmt.QueryRow(deviceId).Scan(&device.DeviceName, &device.DeviceIp, &device.DeviceMac, &device.DeviceTypeId, &device.DeviceClassId)
 	if err != nil {
 		return nil
 	}
@@ -306,7 +308,7 @@ func getDeviceById(deviceId int) *Device {
 }
 
 func addDevice(devices []Device) bool {
-	stmt, err := db.Prepare("insert into device (name, ip, mac, udp, wol, submask) values (?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("insert into device (ip, mac, typeid, classid) values (?, ?, ?, ?)")
 	if err != nil {
 		return false
 	}
@@ -315,7 +317,7 @@ func addDevice(devices []Device) bool {
 		if reflect.ValueOf(dev).IsZero() {
 			continue
 		}
-		_, err = stmt.Exec(dev.DeviceName, dev.DeviceIp, trimMACtoStor(dev.DeviceMac), &dev.DeviceUdp, &dev.DeviceWol, &dev.DeviceSubmask)
+		_, err = stmt.Exec(dev.DeviceIp, trimMACtoStor(dev.DeviceMac), &dev.DeviceTypeId, &dev.DeviceClassId)
 		if err != nil {
 			return false
 		}
@@ -336,15 +338,42 @@ func deleteDevice(deviceId int) bool {
 	return true
 }
 
-func setDevice(deviceId int, deviceName string, deviceIp string, deviceMac string, deviceUdp bool, deviceWol bool, deviceSubmask int) bool {
-	if deviceSubmask == 0 {
-		deviceSubmask = 24
-	}
-	stmt, err := db.Prepare("update device set name = ?, ip = ?, mac = ?, udp = ?, wol = ?, submask = ? where id = ?")
+func setDevice(deviceId int, deviceIp string, deviceMac string, deviceTypeId int, deviceClassId int) bool {
+	stmt, err := db.Prepare("update device set ip = ?, mac = ?, typeid = ?, classid = ? where id = ?")
 	if err != nil {
 		return false
 	}
-	_, err = stmt.Exec(deviceName, deviceIp, trimMACtoStor(deviceMac), deviceUdp, deviceWol, deviceSubmask, deviceId)
+	_, err = stmt.Exec(deviceIp, trimMACtoStor(deviceMac), deviceTypeId, deviceClassId, deviceId)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func getClassrooms() []Classroom {
+	stmt, err := db.Prepare("select classroom.id, classroom.name, classroomgroup.id, classroomgroup.name from classroom,classroomgroup where classroom.groupid = classroomgroup.id")
+	if err != nil {
+		return nil
+	}
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil
+	}
+	var classrooms []Classroom
+	for rows.Next() {
+		var classroom Classroom
+		rows.Scan(&classroom.Id, &classroom.Name, &classroom.GroupId, &classroom.GroupName)
+		classrooms = append(classrooms, classroom)
+	}
+	return classrooms
+}
+
+func setClassroom(id int, name string, groupid int) bool {
+	stmt, err := db.Prepare("update classroom set name = ?, groupid = ? where id = ?")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(name, groupid, id)
 	if err != nil {
 		return false
 	}
