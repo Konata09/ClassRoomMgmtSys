@@ -14,6 +14,7 @@ type Device struct {
 	DeviceMac     string `json:"mac"`
 	DeviceTypeId  int    `json:"device_type_id"`
 	DeviceClassId int    `json:"device_class_id"`
+	pingRes       int
 }
 
 type AllDevices struct {
@@ -72,12 +73,12 @@ func SetDevice(w http.ResponseWriter, r *http.Request) {
 		var msg string
 
 		//for _, dev := range body.Devices {
-			//valid, m := checkDeviceValid(dev.DeviceName, dev.DeviceIp, dev.DeviceMac, dev.DeviceUdp, dev.DeviceWol, dev.DeviceSubmask)
-			//if valid {
-			//	devices = append(devices, dev)
-			//} else {
-			//	msg = msg + m + " "
-			//}
+		//valid, m := checkDeviceValid(dev.DeviceName, dev.DeviceIp, dev.DeviceMac, dev.DeviceUdp, dev.DeviceWol, dev.DeviceSubmask)
+		//if valid {
+		//	devices = append(devices, dev)
+		//} else {
+		//	msg = msg + m + " "
+		//}
 		//}
 		if len(devices) == 0 {
 			ApiErrMsg(w, msg+"No item to add")

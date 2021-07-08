@@ -380,6 +380,24 @@ func getClassrooms() []Classroom {
 	return classrooms
 }
 
+func getClassroomsMainDevices() []Device {
+	stmt, err := db.Prepare("select id, ip, classid, typeid from device where typeid = 1 or typeid = 2 limit 5")
+	if err != nil {
+		return nil
+	}
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil
+	}
+	var devices []Device
+	for rows.Next() {
+		var device Device
+		rows.Scan(&device.DeviceId, &device.DeviceIp, &device.DeviceClassId, &device.DeviceTypeId)
+		devices = append(devices, device)
+	}
+	return devices
+}
+
 func setClassroom(id int, name string, groupid int) bool {
 	stmt, err := db.Prepare("update classroom set name = ?, groupid = ? where id = ?")
 	if err != nil {
