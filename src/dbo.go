@@ -379,3 +379,87 @@ func setClassroom(id int, name string, groupid int) bool {
 	}
 	return true
 }
+
+func addTicket(title string, detail string, severity int, classid int, createUser int, dutyUser1 int, dutyUser2 int, dutyUser3 int, createTime string, startTime string) bool {
+	stmt, err := db.Prepare("insert into ticket(title, detail, severity, classid, createuser, dutyuser1, dutyuser2, dutyuser3, createtime, starttime) values (?,?,?,?,?,?,?,?,?,?)")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(title, detail, severity, classid, createUser, dutyUser1, dutyUser2, dutyUser3, createTime, startTime)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func getTickets() []TicketOverview {
+	stmt, err := db.Prepare("select id, title, severity, status, createuser, username from ticket, user where createuser = uid")
+	if err != nil {
+		return nil
+	}
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil
+	}
+	var ticketOverviews []TicketOverview
+	for rows.Next() {
+		var ticketOverview TicketOverview
+		rows.Scan(&ticketOverview.Id, &ticketOverview.Title, &ticketOverview.Severity, &ticketOverview.Status, &ticketOverview.CreateUser, &ticketOverview.CreateUserName)
+		ticketOverviews = append(ticketOverviews, ticketOverview)
+	}
+	return ticketOverviews
+}
+
+func getTicket(id int) *Ticket {
+	stmt, err := db.Prepare("select ticket.id, title, detail, severity, status, classid, createuser, dutyuser1, dutyuser2, dutyuser3, completeuser, createtime, starttime, completetime, completedetail, classroom.name, classroomgroup.name from ticket, classroom, classroomgroup where ticket.id = ? and classid = classroom.id and classroom.groupid = classroomgroup.id")
+	if err != nil {
+		return nil
+	}
+	var ticket Ticket
+	err = stmt.QueryRow(id).Scan(&ticket.Id, &ticket.Title, &ticket.Detail, &ticket.Severity, &ticket.Status, &ticket.ClassId, &ticket.CreateUser, &ticket.DutyUser1, &ticket.DutyUser2, &ticket.DutyUser3, &ticket.CompleteUser, &ticket.CreateTime, &ticket.StartTime, &ticket.CompleteTime, &ticket.CompleteDetail, &ticket.ClassroomName, &ticket.ClassroomGroup)
+	if err != nil {
+		return nil
+	}
+	ticket.CreateUserName = getUserByUid(ticket.CreateUser).Username
+	ticket.DutyUser1Name = getUserByUid(ticket.DutyUser1).Username
+	ticket.DutyUser2Name = getUserByUid(ticket.DutyUser2).Username
+	ticket.DutyUser3Name = getUserByUid(ticket.DutyUser3).Username
+	ticket.CompleteUserName = getUserByUid(ticket.CompleteUser).Username
+	return &ticket
+}
+
+func setTicketStatus(id int, status int) bool {
+	stmt, err := db.Prepare("update ticket set status = ? where id = ?")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(status, id)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func setTicketDutyUser(id int, dutyUser1 int, dutyUser2 int, dutyUser3 int) bool {
+	stmt, err := db.Prepare("update ticket set dutyuser1 = ?, dutyuser2 = ?, dutyuser3 = ? where id = ?")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(dutyUser1, dutyUser2, dutyUser3, id)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func deleteTicket(id int) bool {
+	stmt, err := db.Prepare("delete from ticket where id = ?")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return false
+	}
+	return true
+}
