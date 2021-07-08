@@ -503,3 +503,15 @@ func setDutyCalender(pos string, user int) bool {
 	}
 	return true
 }
+
+func getPreference(name string, value *string) bool {
+	stmt, err := db.Prepare("select value from preferences where name = ?")
+	if err != nil {
+		return false
+	}
+	err = stmt.QueryRow(name).Scan(&value)
+	if err != nil {
+		return false
+	}
+	return true
+}

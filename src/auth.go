@@ -59,7 +59,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Username: creds.Username,
 		Rolename: role.Rolename,
 		Isadmin:  role.Isadmin,
-
+		Isstaff:  role.Isstaff,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
