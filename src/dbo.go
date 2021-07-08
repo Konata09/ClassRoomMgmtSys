@@ -463,3 +463,43 @@ func deleteTicket(id int) bool {
 	}
 	return true
 }
+
+func getDutyCalender() *DutyCalender {
+	stmt, err := db.Prepare("select * from duty")
+	if err != nil {
+		return nil
+	}
+	var dutyCalender DutyCalender
+	err = stmt.QueryRow().Scan(&dutyCalender.Monday1, &dutyCalender.Monday2, &dutyCalender.Monday3, &dutyCalender.Tuesday1, &dutyCalender.Tuesday2, &dutyCalender.Tuesday3, &dutyCalender.Wednesday1, &dutyCalender.Wednesday2, &dutyCalender.Wednesday3, &dutyCalender.Thursday1, &dutyCalender.Thursday2, &dutyCalender.Thursday3)
+	if err != nil {
+		return nil
+	}
+	dutyCalender.Monday1Name = getUserByUid(dutyCalender.Monday1).Username
+	dutyCalender.Monday2Name = getUserByUid(dutyCalender.Monday2).Username
+	dutyCalender.Monday3Name = getUserByUid(dutyCalender.Monday3).Username
+	dutyCalender.Tuesday1Name = getUserByUid(dutyCalender.Tuesday1).Username
+	dutyCalender.Tuesday2Name = getUserByUid(dutyCalender.Tuesday2).Username
+	dutyCalender.Tuesday3Name = getUserByUid(dutyCalender.Tuesday3).Username
+	dutyCalender.Wednesday1Name = getUserByUid(dutyCalender.Wednesday1).Username
+	dutyCalender.Wednesday2Name = getUserByUid(dutyCalender.Wednesday2).Username
+	dutyCalender.Wednesday3Name = getUserByUid(dutyCalender.Wednesday3).Username
+	dutyCalender.Thursday1Name = getUserByUid(dutyCalender.Thursday1).Username
+	dutyCalender.Thursday2Name = getUserByUid(dutyCalender.Thursday2).Username
+	dutyCalender.Thursday3Name = getUserByUid(dutyCalender.Thursday3).Username
+	dutyCalender.Friday1Name = getUserByUid(dutyCalender.Friday1).Username
+	dutyCalender.Friday2Name = getUserByUid(dutyCalender.Friday2).Username
+	dutyCalender.Friday3Name = getUserByUid(dutyCalender.Friday3).Username
+	return &dutyCalender
+}
+
+func setDutyCalender(pos string, user int) bool {
+	stmt, err := db.Prepare("update duty set ? = ?")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(pos, user)
+	if err != nil {
+		return false
+	}
+	return true
+}
