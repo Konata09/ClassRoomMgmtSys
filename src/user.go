@@ -62,8 +62,7 @@ func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	ok := setPasswordByUid(user.Uid, getPasswordMD5(body.NewPass))
-	if ok {
+	if setPasswordByUid(user.Uid, getPasswordMD5(body.NewPass)) {
 		ApiOk(w)
 	} else {
 		ApiErrMsg(w, "修改失败")
@@ -85,8 +84,7 @@ func AdminChangePassword(w http.ResponseWriter, r *http.Request) {
 		ApiErrMsg(w, "用户不存在")
 		return
 	}
-	ok := setPasswordByUid(body.Uid, getPasswordMD5(body.NewPass))
-	if ok {
+	if setPasswordByUid(body.Uid, getPasswordMD5(body.NewPass)) {
 		ApiOk(w)
 	} else {
 		ApiErrMsg(w, "修改失败")
@@ -147,4 +145,26 @@ func SetUser(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func ChangePhone(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var body struct {
+		Uid   int
+		Phone int
+	}
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		ApiErr(w)
+		return
+	}
+	if setPhoneByUid(body.Uid, body.Phone) {
+		ApiOk(w)
+	} else {
+		ApiErrMsg(w, "修改失败")
+	}
+	return
 }

@@ -46,6 +46,18 @@ func getPhoneByUid(uid int) int {
 	}
 	return phone
 }
+func setPhoneByUid(uid int, phone int) bool {
+	stmt, err := db.Prepare("update user set phone = ? where uid = ?")
+	if err != nil {
+		return false
+	}
+	res, err := stmt.Exec(phone, uid)
+	if err != nil {
+		return false
+	}
+	affected, _ := res.RowsAffected()
+	return affected > 0
+}
 
 func getRoleByUid(uid int) *Role {
 	stmt, err := db.Prepare("select rolename, isadmin, isstaff from user,role where uid = ? and user.roleid = role.roleid")
@@ -317,7 +329,7 @@ func addDevice(devices []Device) bool {
 		if reflect.ValueOf(dev).IsZero() {
 			continue
 		}
-		_, err = stmt.Exec(dev.DeviceIp, trimMACtoStor(dev.DeviceMac), &dev.DeviceTypeId, &dev.DeviceClassId)
+		_, err = stmt.Exec(dev.DeviceIp, trimMACtoStor(dev.DeviceMac), dev.DeviceTypeId, dev.DeviceClassId)
 		if err != nil {
 			return false
 		}
