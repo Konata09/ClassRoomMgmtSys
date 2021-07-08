@@ -120,10 +120,10 @@ func SendUDP(w http.ResponseWriter, r *http.Request) {
 					appendMsg(&errMsg, fmt.Sprintf("id:%d 设备不存在", tar))
 					continue
 				}
-				if !dev.DeviceUdp {
-					appendMsg(&errMsg, fmt.Sprintf("%s: 设备不支持发送普通UDP数据包", dev.DeviceName))
-					continue
-				}
+				//if !dev.DeviceUdp {
+				//	appendMsg(&errMsg, fmt.Sprintf("%s: 设备不支持发送普通UDP数据包", dev.DeviceName))
+				//	continue
+				//}
 				ip := dev.DeviceIp
 				for _, hex := range payloads {
 					err = sendSingleUdpPacket(ip, port, hex)

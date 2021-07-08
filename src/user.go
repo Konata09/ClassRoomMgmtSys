@@ -120,12 +120,12 @@ func SetUser(w http.ResponseWriter, r *http.Request) {
 			ApiErrMsg(w, "用户名已占用")
 			return
 		}
-		ok := addUser(body.Username, getPasswordMD5(body.Password), roleid)
-		if ok {
-			ApiOk(w)
-		} else {
-			ApiErr(w)
-		}
+		//ok := addUser(body.Username, getPasswordMD5(body.Password), roleid)
+		//if ok {
+		//	ApiOk(w)
+		//} else {
+		//	ApiErr(w)
+		//}
 	case "DELETE":
 		var body User
 		err := json.NewDecoder(r.Body).Decode(&body)

@@ -49,16 +49,16 @@ func SendWOL(w http.ResponseWriter, r *http.Request) {
 					appendMsg(&errMsg, fmt.Sprintf("id:%d 设备不存在", tar))
 					continue
 				}
-				if !dev.DeviceWol {
-					appendMsg(&errMsg, fmt.Sprintf("%s: 设备不支持网络唤醒", dev.DeviceName))
-					continue
-				}
+				//if !dev.DeviceWol {
+				//	appendMsg(&errMsg, fmt.Sprintf("%s: 设备不支持网络唤醒", dev.DeviceName))
+				//	continue
+				//}
 				if body.DevAddress {
 					address = append(address, dev.DeviceIp)
 				}
-				if body.SubNetBroadcast {
-					address = append(address, getSubnetBroadcast(dev.DeviceIp, dev.DeviceSubmask))
-				}
+				//if body.SubNetBroadcast {
+				//	address = append(address, getSubnetBroadcast(dev.DeviceIp, dev.DeviceSubmask))
+				//}
 				if body.LocalNetBroadcast {
 					address = append(address, "255.255.255.255")
 				}

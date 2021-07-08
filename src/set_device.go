@@ -71,14 +71,14 @@ func SetDevice(w http.ResponseWriter, r *http.Request) {
 		var devices []Device
 		var msg string
 
-		for _, dev := range body.Devices {
-			valid, m := checkDeviceValid(dev.DeviceName, dev.DeviceIp, dev.DeviceMac, dev.DeviceUdp, dev.DeviceWol, dev.DeviceSubmask)
-			if valid {
-				devices = append(devices, dev)
-			} else {
-				msg = msg + m + " "
-			}
-		}
+		//for _, dev := range body.Devices {
+			//valid, m := checkDeviceValid(dev.DeviceName, dev.DeviceIp, dev.DeviceMac, dev.DeviceUdp, dev.DeviceWol, dev.DeviceSubmask)
+			//if valid {
+			//	devices = append(devices, dev)
+			//} else {
+			//	msg = msg + m + " "
+			//}
+		//}
 		if len(devices) == 0 {
 			ApiErrMsg(w, msg+"No item to add")
 			return
@@ -100,17 +100,17 @@ func SetDevice(w http.ResponseWriter, r *http.Request) {
 			ApiErrMsg(w, "设备不存在")
 			return
 		}
-		valid, m := checkDeviceValid(body.DeviceName, body.DeviceIp, body.DeviceMac, body.DeviceUdp, body.DeviceWol, body.DeviceSubmask)
-		if !valid {
-			ApiErrMsg(w, m)
-			return
-		}
-		ok := setDevice(body.DeviceId, body.DeviceName, body.DeviceIp, body.DeviceMac, body.DeviceUdp, body.DeviceWol, body.DeviceSubmask)
-		if ok {
-			ApiOk(w)
-		} else {
-			ApiErr(w)
-		}
+		//valid, m := checkDeviceValid(body.DeviceName, body.DeviceIp, body.DeviceMac, body.DeviceUdp, body.DeviceWol, body.DeviceSubmask)
+		//if !valid {
+		//	ApiErrMsg(w, m)
+		//	return
+		//}
+		//ok := setDevice(body.DeviceId, body.DeviceName, body.DeviceIp, body.DeviceMac, body.DeviceUdp, body.DeviceWol, body.DeviceSubmask)
+		//if ok {
+		//	ApiOk(w)
+		//} else {
+		//	ApiErr(w)
+		//}
 	case "DELETE":
 		var body Device
 		err := json.NewDecoder(r.Body).Decode(&body)

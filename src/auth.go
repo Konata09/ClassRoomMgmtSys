@@ -73,7 +73,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%s Login success: %d %s\n", time.Now().Format(time.UnixDate), uid, creds.Username)
+	fmt.Printf("%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.Host)
+	fmt.Fprintf(sysLog, "%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.Host)
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",
@@ -141,6 +142,8 @@ func getUserInfoFromJWT(r *http.Request) *User {
 		Username: claims.Username,
 		Rolename: claims.Rolename,
 		Isadmin:  claims.Isadmin,
+		Isstaff:  claims.Isstaff,
+		Phone:    claims.Phone,
 	}
 }
 
@@ -165,10 +168,22 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 24*time.Hour {
-		ApiErrMsg(w, "Token not expires in one day")
+
+	var body struct {
+		Username string `json:"username,omitempty"`
+		Uid      int    `json:"uid,omitempty"`
+	}
+	err = json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		ApiErr(w)
 		return
 	}
+
+	// token 刷新限制
+	//if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 96*time.Hour {
+	//	ApiErrMsg(w, "Token not expires in 4 day")
+	//	return
+	//}
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims.ExpiresAt = expirationTime.Unix()
 	newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -177,6 +192,9 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	fmt.Printf("%s Token refresh success: %d %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.Host)
+	fmt.Fprintf(sysLog, "%s Token refresh success: %d %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.Host)
+
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",
@@ -184,4 +202,10 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 			Token: tokenString,
 		},
 	})
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+
+	}
 }
