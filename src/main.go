@@ -59,12 +59,12 @@ func main() {
 	mux.Handle("/api/v2/user/ChangePhone", VerifyHeader(http.HandlerFunc(ChangePhone)))
 	// 返回全部教室和分组 含基本状态
 	mux.Handle("/api/v2/getRooms", VerifyHeader(http.HandlerFunc(GetClassrooms)))
-	// 返回教室ping状态
-	//mux.Handle("/api/v2/getRoomDetail", VerifyHeader(http.HandlerFunc()))
 	// 返回教室详情
-	//mux.Handle("/api/v2/getRoomStatus", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/getRoomDetail", VerifyHeader(http.HandlerFunc(GetClassroomDetail)))
+	// 返回教室 ping 结果
+	mux.Handle("/api/v2/getRoomStatus", VerifyHeader(http.HandlerFunc(GetClassroomStatus)))
 	// post 修改教室的名称 组
-	//mux.Handle("/api/v2/admin/setRoom", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
+	mux.Handle("/api/v2/admin/setRoom", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetClassroom))))
 	// post 修改设备ip地址
 	//mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
 	// 发送教室控制命令

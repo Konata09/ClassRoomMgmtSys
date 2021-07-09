@@ -51,6 +51,7 @@ func setPhoneByUid(uid int, phone int) bool {
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	res, err := stmt.Exec(phone, uid)
 	if err != nil {
 		return false
@@ -258,6 +259,7 @@ func setCommand(commandId int, commandName string, commandValue string, commandP
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(commandName, trimCommandToStor(commandValue), commandPort, commandId)
 	if err != nil {
 		return false
@@ -319,6 +321,26 @@ func getDeviceById(deviceId int) *Device {
 	return &device
 }
 
+func getDevicesByClassId(classId int) []Device {
+	stmt, err := db.Prepare("select device.id, name, ip, mac, typeid, classid from device, devicetype where device.typeid = devicetype.id and device.classid = ?")
+	if err != nil {
+		return nil
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(classId)
+	if err != nil {
+		return nil
+	}
+	var devices []Device
+	for rows.Next() {
+		var device Device
+		rows.Scan(&device.DeviceId, &device.DeviceName, &device.DeviceIp, &device.DeviceMac, &device.DeviceTypeId, &device.DeviceClassId)
+		device.DeviceMac = trimMACtoShow(device.DeviceMac)
+		devices = append(devices, device)
+	}
+	return devices
+}
+
 func addDevice(devices []Device) bool {
 	stmt, err := db.Prepare("insert into device (ip, mac, typeid, classid) values (?, ?, ?, ?)")
 	if err != nil {
@@ -355,6 +377,7 @@ func setDevice(deviceId int, deviceIp string, deviceMac string, deviceTypeId int
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(deviceIp, trimMACtoStor(deviceMac), deviceTypeId, deviceClassId, deviceId)
 	if err != nil {
 		return false
@@ -368,6 +391,7 @@ func getClassrooms() []Classroom {
 		return nil
 	}
 	rows, err := stmt.Query()
+	defer stmt.Close()
 	if err != nil {
 		return nil
 	}
@@ -380,11 +404,27 @@ func getClassrooms() []Classroom {
 	return classrooms
 }
 
+func getClassroom(id int) *ClassroomDetail {
+	stmt, err := db.Prepare("select classroom.id, classroom.name, classroomgroup.id, classroomgroup.name from classroom,classroomgroup where classroom.groupid = classroomgroup.id and classroom.id = ?")
+	if err != nil {
+		return nil
+	}
+	defer stmt.Close()
+	var classroomDetail ClassroomDetail
+	err = stmt.QueryRow(id).Scan(&classroomDetail.Id, &classroomDetail.Name, &classroomDetail.GroupId, &classroomDetail.GroupName)
+	if err != nil {
+		return nil
+	}
+	classroomDetail.Devices = getDevicesByClassId(id)
+	return &classroomDetail
+}
+
 func getClassroomControllers() []Device {
 	stmt, err := db.Prepare("select id, ip, mac, classid, typeid from device where typeid = 1")
 	if err != nil {
 		return nil
 	}
+	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
 		return nil
@@ -403,6 +443,7 @@ func getClassroomLindges() []Device {
 	if err != nil {
 		return nil
 	}
+	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
 		return nil
@@ -421,6 +462,7 @@ func setClassroom(id int, name string, groupid int) bool {
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(name, groupid, id)
 	if err != nil {
 		return false
@@ -433,6 +475,7 @@ func addTicket(title string, detail string, severity int, classid int, createUse
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(title, detail, severity, classid, createUser, dutyUser1, dutyUser2, dutyUser3, createTime, startTime)
 	if err != nil {
 		return false
@@ -445,6 +488,7 @@ func getTickets() []TicketOverview {
 	if err != nil {
 		return nil
 	}
+	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
 		return nil
@@ -464,6 +508,7 @@ func getTicket(id int) *Ticket {
 		return nil
 	}
 	var ticket Ticket
+	defer stmt.Close()
 	err = stmt.QueryRow(id).Scan(&ticket.Id, &ticket.Title, &ticket.Detail, &ticket.Severity, &ticket.Status, &ticket.ClassId, &ticket.CreateUser, &ticket.DutyUser1, &ticket.DutyUser2, &ticket.DutyUser3, &ticket.CompleteUser, &ticket.CreateTime, &ticket.StartTime, &ticket.CompleteTime, &ticket.CompleteDetail, &ticket.ClassroomName, &ticket.ClassroomGroup)
 	if err != nil {
 		return nil
@@ -481,6 +526,7 @@ func setTicketStatus(id int, status int) bool {
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(status, id)
 	if err != nil {
 		return false
@@ -493,6 +539,7 @@ func setTicketDutyUser(id int, dutyUser1 int, dutyUser2 int, dutyUser3 int) bool
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(dutyUser1, dutyUser2, dutyUser3, id)
 	if err != nil {
 		return false
@@ -505,6 +552,7 @@ func deleteTicket(id int) bool {
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(id)
 	if err != nil {
 		return false
@@ -518,6 +566,7 @@ func getDutyCalender() *DutyCalender {
 		return nil
 	}
 	var dutyCalender DutyCalender
+	defer stmt.Close()
 	err = stmt.QueryRow().Scan(&dutyCalender.Monday1, &dutyCalender.Monday2, &dutyCalender.Monday3, &dutyCalender.Tuesday1, &dutyCalender.Tuesday2, &dutyCalender.Tuesday3, &dutyCalender.Wednesday1, &dutyCalender.Wednesday2, &dutyCalender.Wednesday3, &dutyCalender.Thursday1, &dutyCalender.Thursday2, &dutyCalender.Thursday3)
 	if err != nil {
 		return nil
@@ -545,6 +594,7 @@ func setDutyCalender(pos string, user int) bool {
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(pos, user)
 	if err != nil {
 		return false
@@ -557,6 +607,7 @@ func getPreference(name string, value *string) bool {
 	if err != nil {
 		return false
 	}
+	defer stmt.Close()
 	err = stmt.QueryRow(name).Scan(value)
 	if err != nil {
 		return false

@@ -73,7 +73,7 @@ func SetDevice(w http.ResponseWriter, r *http.Request) {
 		var devices []Device
 		var msg string
 
-		//for _, dev := range body.Devices {
+		//for _, dev := range body.DeviceStatus {
 		//valid, m := checkDeviceValid(dev.DeviceName, dev.DeviceIp, dev.DeviceMac, dev.DeviceUdp, dev.DeviceWol, dev.DeviceSubmask)
 		//if valid {
 		//	devices = append(devices, dev)
