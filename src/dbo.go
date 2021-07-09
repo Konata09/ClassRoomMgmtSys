@@ -378,11 +378,12 @@ func setDevice(deviceId int, deviceIp string, deviceMac string, deviceTypeId int
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(deviceIp, trimMACtoStor(deviceMac), deviceTypeId, deviceClassId, deviceId)
+	res, err := stmt.Exec(deviceIp, trimMACtoStor(deviceMac), deviceTypeId, deviceClassId, deviceId)
 	if err != nil {
 		return false
 	}
-	return true
+	affected, _ := res.RowsAffected()
+	return affected > 0
 }
 
 func getClassrooms() []Classroom {

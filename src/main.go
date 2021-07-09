@@ -66,7 +66,7 @@ func main() {
 	// post 修改教室的名称 组
 	mux.Handle("/api/v2/admin/setRoom", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetClassroom))))
 	// post 修改设备ip地址
-	//mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
+	mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDevice))))
 	// 发送教室控制命令
 	//mux.Handle("/api/v2/sendCmd", VerifyHeader(http.HandlerFunc()))
 	// 返回我的工单

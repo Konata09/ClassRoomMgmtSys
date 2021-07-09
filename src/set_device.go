@@ -12,10 +12,10 @@ type Device struct {
 	DeviceName    string `json:"name"`
 	DeviceIp      string `json:"ip"`
 	DeviceMac     string `json:"mac"`
-	DeviceTypeId  int    `json:"device_type_id"`
-	DeviceClassId int    `json:"device_class_id"`
+	DeviceTypeId  int    `json:"typeid"`
+	DeviceClassId int    `json:"classid"`
 	pingRes       int
-	status		  int
+	status        int
 }
 
 type AllDevices struct {
@@ -102,17 +102,17 @@ func SetDevice(w http.ResponseWriter, r *http.Request) {
 			ApiErrMsg(w, "设备不存在")
 			return
 		}
-		//valid, m := checkDeviceValid(body.DeviceName, body.DeviceIp, body.DeviceMac, body.DeviceUdp, body.DeviceWol, body.DeviceSubmask)
+		//valid, m := checkDeviceValid(body.DeviceName, body.DeviceIp, body.DeviceMac)
 		//if !valid {
 		//	ApiErrMsg(w, m)
 		//	return
 		//}
-		//ok := setDevice(body.DeviceId, body.DeviceName, body.DeviceIp, body.DeviceMac, body.DeviceUdp, body.DeviceWol, body.DeviceSubmask)
-		//if ok {
-		//	ApiOk(w)
-		//} else {
-		//	ApiErr(w)
-		//}
+		ok := setDevice(body.DeviceId, body.DeviceIp, body.DeviceMac, body.DeviceTypeId, body.DeviceClassId)
+		if ok {
+			ApiOk(w)
+		} else {
+			ApiErrMsg(w,"修改失败")
+		}
 	case "DELETE":
 		var body Device
 		err := json.NewDecoder(r.Body).Decode(&body)
