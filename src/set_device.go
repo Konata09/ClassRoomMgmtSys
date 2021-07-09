@@ -15,6 +15,7 @@ type Device struct {
 	DeviceTypeId  int    `json:"device_type_id"`
 	DeviceClassId int    `json:"device_class_id"`
 	pingRes       int
+	status		  int
 }
 
 type AllDevices struct {

@@ -380,8 +380,8 @@ func getClassrooms() []Classroom {
 	return classrooms
 }
 
-func getClassroomsMainDevices() []Device {
-	stmt, err := db.Prepare("select id, ip, classid, typeid from device where typeid = 1 or typeid = 2 limit 5")
+func getClassroomControllers() []Device {
+	stmt, err := db.Prepare("select id, ip, mac, classid, typeid from device where typeid = 1")
 	if err != nil {
 		return nil
 	}
@@ -392,7 +392,25 @@ func getClassroomsMainDevices() []Device {
 	var devices []Device
 	for rows.Next() {
 		var device Device
-		rows.Scan(&device.DeviceId, &device.DeviceIp, &device.DeviceClassId, &device.DeviceTypeId)
+		rows.Scan(&device.DeviceId, &device.DeviceIp, &device.DeviceMac, &device.DeviceClassId, &device.DeviceTypeId)
+		devices = append(devices, device)
+	}
+	return devices
+}
+
+func getClassroomLindges() []Device {
+	stmt, err := db.Prepare("select id, ip, mac, classid, typeid from device where typeid = 2")
+	if err != nil {
+		return nil
+	}
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil
+	}
+	var devices []Device
+	for rows.Next() {
+		var device Device
+		rows.Scan(&device.DeviceId, &device.DeviceIp, &device.DeviceMac, &device.DeviceClassId, &device.DeviceTypeId)
 		devices = append(devices, device)
 	}
 	return devices

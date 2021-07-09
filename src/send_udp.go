@@ -18,30 +18,6 @@ type SendUdpPacket struct {
 	Repeat        int    `json:"repeat"`
 }
 
-func getControllerStatus(ip string) error {
-	payload, _ := hexStringToByte("4c696768746f6efe08140a0026ff")
-	pc, err := net.ListenUDP("udp4", nil)
-	if err != nil {
-		return errors.New(fmt.Sprintf("%s when sending packet to %s", err, ip))
-	}
-	defer pc.Close()
-	addr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", ip, 4001))
-	if err != nil {
-		return errors.New(fmt.Sprintf("%s when sending packet to %s", err, ip))
-	}
-	_, err = pc.WriteTo(payload, addr)
-	if err != nil {
-		return errors.New(fmt.Sprintf("%s when sending packet to %s", err, ip))
-	}
-	buf := make([]byte, 8)
-	_, _, err = pc.ReadFrom(buf)
-	if err != nil {
-		return errors.New(fmt.Sprintf("%s when sending packet to %s", err, ip))
-	}
-	fmt.Printf("%x", buf)
-	return nil
-}
-
 func sendSingleUdpPacket(ip string, port int, payload []byte) error {
 	pc, err := net.ListenPacket("udp4", "")
 	if err != nil {
