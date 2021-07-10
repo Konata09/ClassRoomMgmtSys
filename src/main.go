@@ -72,9 +72,9 @@ func main() {
 	// 返回我的工单
 	mux.Handle("/api/v2/getMyTicket", VerifyHeader(http.HandlerFunc(GetUserDutyTicket)))
 	// 返回全部工单 动态确定获取条数
-	mux.Handle("/api/v2/getTicket", VerifyHeader(http.HandlerFunc(GetAllTicket)))
+	mux.Handle("/api/v2/getTickets", VerifyHeader(http.HandlerFunc(GetAllTicket)))
 	// 返回工单详情
-	//mux.Handle("/api/v2/getTicketDetail", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/getTicketDetail", VerifyHeader(http.HandlerFunc(GetTicketDetail)))
 	//mux.Handle("/api/v2/admin/setTicketDutyUser", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
 	//mux.Handle("/api/v2/deleteTicket", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
 	//mux.Handle("/api/v2/setTicketDone", VerifyHeader(http.HandlerFunc()))

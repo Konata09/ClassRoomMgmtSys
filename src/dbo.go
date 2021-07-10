@@ -472,7 +472,7 @@ func setClassroom(id int, name string, groupid int) bool {
 }
 
 func addTicket(title string, detail string, severity int, classid int, createUser int, dutyUser1 int, dutyUser2 int, dutyUser3 int, createTime string, startTime string) bool {
-	stmt, err := db.Prepare("insert into ticket(title, detail, severity, classid, createuser, dutyuser1, dutyuser2, dutyuser3, createtime, starttime) values (?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.Prepare("insert into ticket(title, detail, severity, classid, createuser, dutyuser1, dutyuser2, dutyuser3, createtime, starttime, completetime, completeuser,completedetail) values (?,?,?,?,?,?,?,?,?,?,'',0,'')")
 	if err != nil {
 		return false
 	}
@@ -515,10 +515,18 @@ func getTicket(id int) *Ticket {
 		return nil
 	}
 	ticket.CreateUserName = getUserByUid(ticket.CreateUser).Username
-	ticket.DutyUser1Name = getUserByUid(ticket.DutyUser1).Username
-	ticket.DutyUser2Name = getUserByUid(ticket.DutyUser2).Username
-	ticket.DutyUser3Name = getUserByUid(ticket.DutyUser3).Username
-	ticket.CompleteUserName = getUserByUid(ticket.CompleteUser).Username
+	if ticket.DutyUser1 != 0 {
+		ticket.DutyUser1Name = getUserByUid(ticket.DutyUser1).Username
+	}
+	if ticket.DutyUser2 != 0 {
+		ticket.DutyUser2Name = getUserByUid(ticket.DutyUser2).Username
+	}
+	if ticket.DutyUser3 != 0 {
+		ticket.DutyUser3Name = getUserByUid(ticket.DutyUser3).Username
+	}
+	if ticket.CompleteUser != 0 {
+		ticket.CompleteUserName = getUserByUid(ticket.CompleteUser).Username
+	}
 	return &ticket
 }
 

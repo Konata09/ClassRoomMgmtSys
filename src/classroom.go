@@ -19,26 +19,26 @@ type Classroom struct {
 }
 
 type AllClassroom struct {
-	Count      int         `json:"count,omitempty"`
-	Classrooms []Classroom `json:"classrooms,omitempty"`
+	Count      int         `json:"count"`
+	Classrooms []Classroom `json:"classrooms"`
 }
 type Camera struct {
-	DeviceId  int    `json:"device_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Type      int    `json:"device_type,omitempty"`
-	Ip        string `json:"ip,omitempty"`
-	Mac       string `json:"mac,omitempty"`
-	RtspAddr  string `json:"rtsp_addr,omitempty"`
-	RelayAddr string `json:"relay_addr,omitempty"`
+	DeviceId  int    `json:"device_id"`
+	Name      string `json:"name"`
+	Type      int    `json:"device_type"`
+	Ip        string `json:"ip"`
+	Mac       string `json:"mac"`
+	RtspAddr  string `json:"rtsp_addr"`
+	RelayAddr string `json:"relay_addr"`
 }
 
 type ClassroomDetail struct {
-	Id        int      `json:"id,omitempty"`
-	Name      string   `json:"name,omitempty"`
-	GroupId   int      `json:"group_id,omitempty"`
-	GroupName string   `json:"group_name,omitempty"`
-	Devices   []Device `json:"devices,omitempty"`
-	Cameras   []Camera `json:"cameras,omitempty"`
+	Id        int      `json:"id"`
+	Name      string   `json:"name"`
+	GroupId   int      `json:"group_id"`
+	GroupName string   `json:"group_name"`
+	Devices   []Device `json:"devices"`
+	Cameras   []Camera `json:"cameras"`
 }
 
 type ClassroomStatus struct {
@@ -55,9 +55,9 @@ type DeviceStatus struct {
 }
 
 type SetClassroomJson struct {
-	ClassId int    `json:"classid,omitempty"`
-	GroupId int    `json:"groupid,omitempty"`
-	Name    string `json:"name,omitempty"`
+	ClassId int    `json:"classid"`
+	GroupId int    `json:"groupid"`
+	Name    string `json:"name"`
 }
 
 func GetClassrooms(w http.ResponseWriter, r *http.Request) {

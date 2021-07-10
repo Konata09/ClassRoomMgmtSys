@@ -23,9 +23,9 @@ CmdId - CmdName
 	14 - 投影关
 */
 type SendCmd struct {
-	ClassId int    `json:"class_id,omitempty"`
-	CmdName string `json:"cmd_name,omitempty"`
-	CmdId   int    `json:"cmd_id,omitempty"`
+	ClassId int    `json:"class_id"`
+	CmdName string `json:"cmd_name"`
+	CmdId   int    `json:"cmd_id"`
 }
 
 func HandleCmd(w http.ResponseWriter, r *http.Request) {

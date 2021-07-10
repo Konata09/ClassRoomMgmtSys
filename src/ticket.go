@@ -7,42 +7,42 @@ import (
 )
 
 type TicketOverview struct {
-	Id             int    `json:"id,omitempty"`
-	Title          string `json:"title,omitempty"`
-	Severity       int    `json:"severity,omitempty"`
-	Status         int    `json:"status,omitempty"`
-	CreateUser     int    `json:"create_user,omitempty"`
-	CreateUserName string `json:"create_user_name,omitempty"`
+	Id             int    `json:"id"`
+	Title          string `json:"title"`
+	Severity       int    `json:"severity"`
+	Status         int    `json:"status"`
+	CreateUser     int    `json:"create_user"`
+	CreateUserName string `json:"create_user_name"`
 }
 
 type Ticket struct {
-	Id               int    `json:"id,omitempty"`
-	Title            string `json:"title,omitempty"`
-	Detail           string `json:"detail,omitempty"`
-	Severity         int    `json:"severity,omitempty"`
-	Status           int    `json:"status,omitempty"`
-	ClassId          int    `json:"class_id,omitempty"`
-	ClassroomName    string `json:"classroom_name,omitempty"`
-	ClassroomGroup   string `json:"classroom_group,omitempty"`
-	CreateUser       int    `json:"create_user,omitempty"`
-	CreateUserName   string `json:"create_user_name,omitempty"`
-	DutyUser1        int    `json:"duty_user_1,omitempty"`
-	DutyUser1Name    string `json:"duty_user_1_name,omitempty"`
-	DutyUser2        int    `json:"duty_user_2,omitempty"`
-	DutyUser2Name    string `json:"duty_user_2_name,omitempty"`
-	DutyUser3        int    `json:"duty_user_3,omitempty"`
-	DutyUser3Name    string `json:"duty_user_3_name,omitempty"`
-	CompleteUser     int    `json:"complete_user,omitempty"`
-	CompleteUserName string `json:"complete_user_name,omitempty"`
-	CreateTime       string `json:"create_time,omitempty"`
-	StartTime        string `json:"start_time,omitempty"`
-	CompleteTime     string `json:"complete_time,omitempty"`
-	CompleteDetail   string `json:"complete_detail,omitempty"`
+	Id               int    `json:"id"`
+	Title            string `json:"title"`
+	Detail           string `json:"detail"`
+	Severity         int    `json:"severity"`
+	Status           int    `json:"status"`
+	ClassId          int    `json:"class_id"`
+	ClassroomName    string `json:"classroom_name"`
+	ClassroomGroup   string `json:"classroom_group"`
+	CreateUser       int    `json:"create_user"`
+	CreateUserName   string `json:"create_user_name"`
+	DutyUser1        int    `json:"duty_user_1"`
+	DutyUser1Name    string `json:"duty_user_1_name"`
+	DutyUser2        int    `json:"duty_user_2"`
+	DutyUser2Name    string `json:"duty_user_2_name"`
+	DutyUser3        int    `json:"duty_user_3"`
+	DutyUser3Name    string `json:"duty_user_3_name"`
+	CompleteUser     int    `json:"complete_user"`
+	CompleteUserName string `json:"complete_user_name"`
+	CreateTime       string `json:"create_time"`
+	StartTime        string `json:"start_time"`
+	CompleteTime     string `json:"complete_time"`
+	CompleteDetail   string `json:"complete_detail"`
 }
 
 type AllTicket struct {
-	Count   int              `json:"count,omitempty"`
-	Tickets []TicketOverview `json:"tickets,omitempty"`
+	Count   int              `json:"count"`
+	Tickets []TicketOverview `json:"tickets"`
 }
 
 func AddTicket(w http.ResponseWriter, r *http.Request) {
@@ -106,5 +106,22 @@ func GetAllTicket(w http.ResponseWriter, r *http.Request) {
 		Count:   len(tickets),
 		Tickets: tickets,
 	}})
-
+}
+func GetTicketDetail(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	idParam := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil || id < 1 {
+		ApiErrMsg(w, "id 无效")
+		return
+	}
+	ticket := getTicket(id)
+	if ticket == nil {
+		ApiErr(w)
+		return
+	}
+	json.NewEncoder(w).Encode(ApiReturn{0, "OK", ticket})
 }
