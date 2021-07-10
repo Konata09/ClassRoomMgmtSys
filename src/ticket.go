@@ -125,3 +125,66 @@ func GetTicketDetail(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(ApiReturn{0, "OK", ticket})
 }
+
+func SetTicketDutyUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var ticket Ticket
+	err := json.NewDecoder(r.Body).Decode(&ticket)
+	if err != nil {
+		ApiErr(w)
+		return
+	}
+	dUser1 := ticket.DutyUser1
+	dUser2 := ticket.DutyUser2
+	dUser3 := ticket.DutyUser3
+	ret := setTicketDutyUser(ticket.Id, dUser1, dUser2, dUser3)
+	if ret {
+		ApiOk(w)
+		return
+	} else {
+		ApiErrMsg(w, "修改负责人失败")
+	}
+}
+
+func DeleteTicket(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var ticket Ticket
+	err := json.NewDecoder(r.Body).Decode(&ticket)
+	if err != nil {
+		ApiErr(w)
+		return
+	}
+	ret := deleteTicket(ticket.Id)
+	if ret {
+		ApiOk(w)
+		return
+	} else {
+		ApiErrMsg(w, "删除工单失败")
+	}
+}
+
+func SetTicketStatus(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var ticket Ticket
+	err := json.NewDecoder(r.Body).Decode(&ticket)
+	if err != nil {
+		ApiErr(w)
+		return
+	}
+	ret := setTicketStatus(ticket.Id, ticket.Status)
+	if ret {
+		ApiOk(w)
+		return
+	} else {
+		ApiErrMsg(w, "修改工单状态失败")
+	}
+}

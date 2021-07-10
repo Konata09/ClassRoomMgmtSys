@@ -75,9 +75,9 @@ func main() {
 	mux.Handle("/api/v2/getTickets", VerifyHeader(http.HandlerFunc(GetAllTicket)))
 	// 返回工单详情
 	mux.Handle("/api/v2/getTicketDetail", VerifyHeader(http.HandlerFunc(GetTicketDetail)))
-	//mux.Handle("/api/v2/admin/setTicketDutyUser", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
-	//mux.Handle("/api/v2/deleteTicket", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
-	//mux.Handle("/api/v2/setTicketDone", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/admin/setTicketDutyUser", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetTicketDutyUser))))
+	mux.Handle("/api/v2/admin/deleteTicket", VerifyHeader(VerifyAdmin(http.HandlerFunc(DeleteTicket))))
+	mux.Handle("/api/v2/setTicketStatus", VerifyHeader(http.HandlerFunc(SetTicketStatus)))
 	// 修改值班表
 	//mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
 	// 获得当日值班
