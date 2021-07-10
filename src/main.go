@@ -68,7 +68,7 @@ func main() {
 	// post 修改设备ip地址
 	mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDevice))))
 	// 发送教室控制命令
-	//mux.Handle("/api/v2/sendCmd", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/sendCmd", VerifyHeader(http.HandlerFunc(HandleCmd)))
 	// 返回我的工单
 	//mux.Handle("/api/v2/getMyTicket", VerifyHeader(http.HandlerFunc()))
 	// 返回全部工单 动态确定获取条数
