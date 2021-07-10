@@ -484,13 +484,13 @@ func addTicket(title string, detail string, severity int, classid int, createUse
 	return true
 }
 
-func getTickets() []TicketOverview {
-	stmt, err := db.Prepare("select id, title, severity, status, createuser, username from ticket, user where createuser = uid")
+func getTickets(limit int) []TicketOverview {
+	stmt, err := db.Prepare("select id, title, severity, status, createuser, username from ticket, user where createuser = uid order by id desc limit ?")
 	if err != nil {
 		return nil
 	}
 	defer stmt.Close()
-	rows, err := stmt.Query()
+	rows, err := stmt.Query(limit)
 	if err != nil {
 		return nil
 	}
@@ -520,6 +520,25 @@ func getTicket(id int) *Ticket {
 	ticket.DutyUser3Name = getUserByUid(ticket.DutyUser3).Username
 	ticket.CompleteUserName = getUserByUid(ticket.CompleteUser).Username
 	return &ticket
+}
+
+func getUserDutyTicketOverview(id int) []TicketOverview {
+	stmt, err := db.Prepare("select ticket.id, title, severity, status, createuser, username from ticket, user where (dutyuser1 = ? or dutyuser2 = ? or dutyuser3 = ?) and createuser = user.uid")
+	if err != nil {
+		return nil
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(id, id, id)
+	if err != nil {
+		return nil
+	}
+	var ticketOverviews []TicketOverview
+	for rows.Next() {
+		var ticketOverview TicketOverview
+		rows.Scan(&ticketOverview.Id, &ticketOverview.Title, &ticketOverview.Severity, &ticketOverview.Status, &ticketOverview.CreateUser, &ticketOverview.CreateUserName)
+		ticketOverviews = append(ticketOverviews, ticketOverview)
+	}
+	return ticketOverviews
 }
 
 func setTicketStatus(id int, status int) bool {

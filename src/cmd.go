@@ -23,9 +23,9 @@ CmdId - CmdName
 	14 - 投影关
 */
 type SendCmd struct {
-	ClassId int
-	CmdName string
-	CmdId   int
+	ClassId int    `json:"class_id,omitempty"`
+	CmdName string `json:"cmd_name,omitempty"`
+	CmdId   int    `json:"cmd_id,omitempty"`
 }
 
 func HandleCmd(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +36,10 @@ func HandleCmd(w http.ResponseWriter, r *http.Request) {
 	var sendCmdJson SendCmd
 	json.NewDecoder(r.Body).Decode(&sendCmdJson)
 	classroom := getClassroom(sendCmdJson.ClassId)
+	if classroom == nil {
+		ApiErrMsg(w,"教室不存在")
+		return
+	}
 	var targetId int
 	var ret ApiReturn
 	if sendCmdJson.CmdId == 3 {

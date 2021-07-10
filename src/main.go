@@ -49,8 +49,6 @@ func main() {
 	mux.Handle("/api/v2/logout", VerifyHeader(http.HandlerFunc(Logout)))
 	//mux.Handle("/api/v2/getCommand", VerifyHeader(http.HandlerFunc(GetCommand)))
 	//mux.Handle("/api/v2/getDevice", VerifyHeader(http.HandlerFunc(GetDevice)))
-	//mux.Handle("/api/v2/sendUDP", VerifyHeader(http.HandlerFunc(SendUDP)))
-	//mux.Handle("/api/v2/sendWOL", VerifyHeader(http.HandlerFunc(SendWOL)))
 	mux.Handle("/api/v2/user/changePassword", VerifyHeader(http.HandlerFunc(UserChangePassword)))
 	mux.Handle("/api/v2/admin/changePassword", VerifyHeader(VerifyAdmin(http.HandlerFunc(AdminChangePassword))))
 	mux.Handle("/api/v2/admin/setUser", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetUser))))
@@ -69,10 +67,12 @@ func main() {
 	mux.Handle("/api/v2/admin/setDevice", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDevice))))
 	// 发送教室控制命令
 	mux.Handle("/api/v2/sendCmd", VerifyHeader(http.HandlerFunc(HandleCmd)))
+	// 增加 Ticket
+	mux.Handle("/api/v2/addTicket",VerifyHeader(http.HandlerFunc(AddTicket)))
 	// 返回我的工单
-	//mux.Handle("/api/v2/getMyTicket", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/getMyTicket", VerifyHeader(http.HandlerFunc(GetUserDutyTicket)))
 	// 返回全部工单 动态确定获取条数
-	//mux.Handle("/api/v2/getTicket", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/getTicket", VerifyHeader(http.HandlerFunc(GetAllTicket)))
 	// 返回工单详情
 	//mux.Handle("/api/v2/getTicketDetail", VerifyHeader(http.HandlerFunc()))
 	//mux.Handle("/api/v2/admin/setTicketDutyUser", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
