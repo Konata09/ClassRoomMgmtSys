@@ -589,41 +589,79 @@ func deleteTicket(id int) bool {
 }
 
 func getDutyCalender() *DutyCalender {
-	stmt, err := db.Prepare("select * from duty")
+	stmt, err := db.Prepare("select name, user, username from duty_v2, user where user = uid")
 	if err != nil {
 		return nil
 	}
 	var dutyCalender DutyCalender
 	defer stmt.Close()
-	err = stmt.QueryRow().Scan(&dutyCalender.Monday1, &dutyCalender.Monday2, &dutyCalender.Monday3, &dutyCalender.Tuesday1, &dutyCalender.Tuesday2, &dutyCalender.Tuesday3, &dutyCalender.Wednesday1, &dutyCalender.Wednesday2, &dutyCalender.Wednesday3, &dutyCalender.Thursday1, &dutyCalender.Thursday2, &dutyCalender.Thursday3)
+	rows, err := stmt.Query()
 	if err != nil {
 		return nil
 	}
-	dutyCalender.Monday1Name = getUserByUid(dutyCalender.Monday1).Username
-	dutyCalender.Monday2Name = getUserByUid(dutyCalender.Monday2).Username
-	dutyCalender.Monday3Name = getUserByUid(dutyCalender.Monday3).Username
-	dutyCalender.Tuesday1Name = getUserByUid(dutyCalender.Tuesday1).Username
-	dutyCalender.Tuesday2Name = getUserByUid(dutyCalender.Tuesday2).Username
-	dutyCalender.Tuesday3Name = getUserByUid(dutyCalender.Tuesday3).Username
-	dutyCalender.Wednesday1Name = getUserByUid(dutyCalender.Wednesday1).Username
-	dutyCalender.Wednesday2Name = getUserByUid(dutyCalender.Wednesday2).Username
-	dutyCalender.Wednesday3Name = getUserByUid(dutyCalender.Wednesday3).Username
-	dutyCalender.Thursday1Name = getUserByUid(dutyCalender.Thursday1).Username
-	dutyCalender.Thursday2Name = getUserByUid(dutyCalender.Thursday2).Username
-	dutyCalender.Thursday3Name = getUserByUid(dutyCalender.Thursday3).Username
-	dutyCalender.Friday1Name = getUserByUid(dutyCalender.Friday1).Username
-	dutyCalender.Friday2Name = getUserByUid(dutyCalender.Friday2).Username
-	dutyCalender.Friday3Name = getUserByUid(dutyCalender.Friday3).Username
+	for rows.Next() {
+		var uid int
+		var day string
+		var username string
+		rows.Scan(&day, &uid, &username)
+		switch day {
+		case "Monday1":
+			dutyCalender.Monday1 = uid
+			dutyCalender.Monday1Name = username
+		case "Monday2":
+			dutyCalender.Monday2 = uid
+			dutyCalender.Monday2Name = username
+		case "Monday3":
+			dutyCalender.Monday3 = uid
+			dutyCalender.Monday3Name = username
+		case "Tuesday1":
+			dutyCalender.Tuesday1 = uid
+			dutyCalender.Tuesday1Name = username
+		case "Tuesday2":
+			dutyCalender.Tuesday2 = uid
+			dutyCalender.Tuesday2Name = username
+		case "Tuesday3":
+			dutyCalender.Tuesday3 = uid
+			dutyCalender.Tuesday3Name = username
+		case "Wednesday1":
+			dutyCalender.Wednesday1 = uid
+			dutyCalender.Wednesday1Name = username
+		case "Wednesday2":
+			dutyCalender.Wednesday2 = uid
+			dutyCalender.Wednesday2Name = username
+		case "Wednesday3":
+			dutyCalender.Wednesday3 = uid
+			dutyCalender.Wednesday3Name = username
+		case "Thursday1":
+			dutyCalender.Thursday1 = uid
+			dutyCalender.Thursday1Name = username
+		case "Thursday2":
+			dutyCalender.Thursday2 = uid
+			dutyCalender.Thursday2Name = username
+		case "Thursday3":
+			dutyCalender.Thursday3 = uid
+			dutyCalender.Thursday3Name = username
+		case "Friday1":
+			dutyCalender.Friday1 = uid
+			dutyCalender.Friday1Name = username
+		case "Friday2":
+			dutyCalender.Friday2 = uid
+			dutyCalender.Friday2Name = username
+		case "Friday3":
+			dutyCalender.Friday3 = uid
+			dutyCalender.Friday3Name = username
+		}
+	}
 	return &dutyCalender
 }
 
 func setDutyCalender(pos string, user int) bool {
-	stmt, err := db.Prepare("update duty set ? = ?")
+	stmt, err := db.Prepare("update duty_v2 set user = ? where name = ?")
 	if err != nil {
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(pos, user)
+	_, err = stmt.Exec(user, pos)
 	if err != nil {
 		return false
 	}

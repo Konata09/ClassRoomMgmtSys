@@ -79,9 +79,9 @@ func main() {
 	mux.Handle("/api/v2/admin/deleteTicket", VerifyHeader(VerifyAdmin(http.HandlerFunc(DeleteTicket))))
 	mux.Handle("/api/v2/setTicketStatus", VerifyHeader(http.HandlerFunc(SetTicketStatus)))
 	// 修改值班表
-	//mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc())))
-	// 获得当日值班
-	//mux.Handle("/api/v2/getDutyUser", VerifyHeader(http.HandlerFunc()))
+	mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDutyCalenderUser))))
+	// 获得值班表
+	mux.Handle("/api/v2/getDutyCalendar", VerifyHeader(http.HandlerFunc(GetDutyCalender)))
 
 	//fmt.Println(getSubnetBroadcast("172.16.0.254",32))
 	fmt.Println("UDPServer listen on 63112")
