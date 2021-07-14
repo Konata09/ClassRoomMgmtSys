@@ -157,7 +157,7 @@ func GetClassroomDetail(w http.ResponseWriter, r *http.Request) {
 			cam.Name = device.DeviceName
 			switch device.DeviceTypeId {
 			case 4: // Dahua
-				cam.RtspAddr = fmt.Sprintf("rtsp://%s", device.DeviceIp)
+				cam.RtspAddr = fmt.Sprintf("rtsp://%s/cam/realmonitor?channel=1&subtype=0", device.DeviceIp)
 				break
 			case 5: // Tiandy
 				cam.RtspAddr = fmt.Sprintf("rtsp://%s", device.DeviceIp)
@@ -166,7 +166,7 @@ func GetClassroomDetail(w http.ResponseWriter, r *http.Request) {
 				cam.RtspAddr = fmt.Sprintf("rtsp://%s", device.DeviceIp)
 				break
 			case 8: // ScreenEncoder
-				cam.RtspAddr = fmt.Sprintf("rtsp://%s", device.DeviceIp)
+				cam.RtspAddr = fmt.Sprintf("rtsp://%s/stream", device.DeviceIp)
 				break
 			}
 			cameras = append(cameras, cam)

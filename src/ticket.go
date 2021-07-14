@@ -11,6 +11,7 @@ type TicketOverview struct {
 	Title          string `json:"title"`
 	Severity       int    `json:"severity"`
 	Status         int    `json:"status"`
+	Place          string `json:"place"`
 	CreateUser     int    `json:"create_user"`
 	CreateUserName string `json:"create_user_name"`
 }
@@ -21,6 +22,7 @@ type Ticket struct {
 	Detail           string `json:"detail"`
 	Severity         int    `json:"severity"`
 	Status           int    `json:"status"`
+	Place            string `json:"place"`
 	ClassId          int    `json:"class_id"`
 	ClassroomName    string `json:"classroom_name"`
 	ClassroomGroup   string `json:"classroom_group"`
@@ -52,7 +54,8 @@ func AddTicket(w http.ResponseWriter, r *http.Request) {
 	}
 	var ticket Ticket
 	json.NewDecoder(r.Body).Decode(&ticket)
-	ret := addTicket(ticket.Title, ticket.Detail, ticket.Severity, ticket.ClassId, ticket.CreateUser, ticket.DutyUser1, ticket.DutyUser2, ticket.DutyUser3, ticket.CreateTime, ticket.StartTime)
+	//ret := addTicket(ticket.Title, ticket.Detail, ticket.Severity, ticket.ClassId, ticket.CreateUser, ticket.DutyUser1, ticket.DutyUser2, ticket.DutyUser3, ticket.CreateTime, ticket.StartTime)
+	ret := addTicket(ticket.Title, ticket.Detail, ticket.Severity, ticket.Place, ticket.CreateUser, ticket.DutyUser1, ticket.DutyUser2, ticket.DutyUser3, ticket.CreateTime, ticket.StartTime)
 	if ret {
 		ApiOk(w)
 		return

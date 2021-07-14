@@ -24,7 +24,7 @@ func pingSingle(ip string, id int, c chan DetectRes) {
 		c <- pingres
 		return
 	}
-	pinger.Timeout = 2 * time.Second
+	pinger.Timeout = 1 * time.Second
 	pinger.Count = 1
 	err = pinger.Run() // Blocks until finished.
 	if err != nil {
@@ -84,7 +84,7 @@ func getControollerStatusSingle(ip string, id int, c chan DetectRes) {
 		return
 	}
 	buf := make([]byte, 8)
-	pc.SetReadDeadline(time.Now().Add(time.Second * 2))
+	pc.SetReadDeadline(time.Now().Add(time.Second * 1))
 	_, _, err = pc.ReadFrom(buf)
 	if err != nil {
 		fmt.Printf("%s when getControollerStatus from %s\n", err, ip)
