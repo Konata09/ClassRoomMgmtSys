@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -163,6 +164,7 @@ func DeleteTicket(w http.ResponseWriter, r *http.Request) {
 		ApiErr(w)
 		return
 	}
+	fmt.Println(ticket.Id)
 	ret := deleteTicket(ticket.Id)
 	if ret {
 		ApiOk(w)

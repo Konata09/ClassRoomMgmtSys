@@ -504,13 +504,13 @@ func getTickets(limit int) []TicketOverview {
 }
 
 func getTicket(id int) *Ticket {
-	stmt, err := db.Prepare("select ticket.id, title, detail, severity, status, classid, place, createuser, dutyuser1, dutyuser2, dutyuser3, completeuser, createtime, starttime, completetime, completedetail, classroom.name, classroomgroup.name from ticket, classroom, classroomgroup where ticket.id = ? and classid = classroom.id and classroom.groupid = classroomgroup.id")
+	stmt, err := db.Prepare("select ticket.id, title, detail, severity, status, place, createuser, dutyuser1, dutyuser2, dutyuser3, completeuser, createtime, starttime, completetime, completedetail from ticket where ticket.id = ? ")
 	if err != nil {
 		return nil
 	}
 	var ticket Ticket
 	defer stmt.Close()
-	err = stmt.QueryRow(id).Scan(&ticket.Id, &ticket.Title, &ticket.Detail, &ticket.Severity, &ticket.Status, &ticket.ClassId, &ticket.Place, &ticket.CreateUser, &ticket.DutyUser1, &ticket.DutyUser2, &ticket.DutyUser3, &ticket.CompleteUser, &ticket.CreateTime, &ticket.StartTime, &ticket.CompleteTime, &ticket.CompleteDetail, &ticket.ClassroomName, &ticket.ClassroomGroup)
+	err = stmt.QueryRow(id).Scan(&ticket.Id, &ticket.Title, &ticket.Detail, &ticket.Severity, &ticket.Status, &ticket.Place, &ticket.CreateUser, &ticket.DutyUser1, &ticket.DutyUser2, &ticket.DutyUser3, &ticket.CompleteUser, &ticket.CreateTime, &ticket.StartTime, &ticket.CompleteTime, &ticket.CompleteDetail)
 	if err != nil {
 		return nil
 	}
