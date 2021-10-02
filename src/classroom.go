@@ -208,7 +208,7 @@ func GetClassroomStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	go pingDevices(devices, doneDevice)
-	go getControollerStatusSingle(controllerIp, 1, doneController)
+	go getControllerStatusSingle(controllerIp, 1, doneController)
 	var classroomStatus ClassroomStatus
 	classroomStatus.Id = classId
 	var devStatus []DeviceStatus

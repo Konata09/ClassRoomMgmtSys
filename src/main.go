@@ -19,7 +19,7 @@ func initDBConn() {
 		log.Fatal(err)
 	}
 	if db == nil {
-		fmt.Println("Error open database.")
+		log.Fatal("Error open database.")
 	}
 }
 
@@ -36,8 +36,8 @@ func initSyslog() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println("syslog established")
-	sysLog.Info("syslog established")
+	fmt.Println("ClassRoomMgmtSys server is restarted.")
+	sysLog.Warning("ClassRoomMgmtSys server is restarted.")
 }
 
 func main() {
@@ -82,8 +82,6 @@ func main() {
 	mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDutyCalenderUser))))
 	// 获得值班表
 	mux.Handle("/api/v2/getDutyCalendar", VerifyHeader(http.HandlerFunc(GetDutyCalender)))
-
-	//fmt.Println(getSubnetBroadcast("172.16.0.254",32))
-	fmt.Println("UDPServer listen on 63112")
+	logBoth("Server listen on 63112")
 	log.Panic(http.ListenAndServe(":63112", mux))
 }

@@ -57,7 +57,7 @@ func pingDevices(devices []Device, done chan int) {
 	done <- 1
 }
 
-func getControollerStatusSingle(ip string, id int, c chan DetectRes) {
+func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 	var pingres DetectRes
 	pingres.id = id
 
@@ -136,7 +136,7 @@ func getControllersStatus(devices []Device, done chan int) {
 	var size int
 	for i, device := range devices {
 		if device.DeviceTypeId == 1 {
-			go getControollerStatusSingle(device.DeviceIp, i, c)
+			go getControllerStatusSingle(device.DeviceIp, i, c)
 			size++
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"golang.org/x/text/encoding/simplifiedchinese"
 	strconv "strconv"
 	"strings"
 )
@@ -100,4 +101,15 @@ func appendMsg(oldMsg *string, newMsg string) {
 	} else {
 		*oldMsg = newMsg
 	}
+}
+
+func logBoth(format string, a ...interface{}) {
+	logStr := fmt.Sprintf(format, a...)
+	gbk := simplifiedchinese.GBK.NewEncoder()
+	gbkStr, err := gbk.String(logStr)
+	if err != nil {
+		fmt.Println("Error when convert UTF8 to GBK")
+	}
+	sysLog.Info(gbkStr)
+	fmt.Println(logStr)
 }

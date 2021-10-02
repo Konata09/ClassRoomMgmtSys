@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"time"
@@ -73,8 +74,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.RemoteAddr)
-	fmt.Fprintf(sysLog, "%s Login success: %d %s from %s\n", time.Now().Format(time.UnixDate), uid, creds.Username, r.RemoteAddr)
+	logBoth("[LOGIN]Login success: %d %s from %s\n", uid, creds.Username, r.RemoteAddr)
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",
@@ -112,6 +112,12 @@ func VerifyHeader(next http.Handler) http.Handler {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json;charset=utf-8")
+
+
+		buf, _ := ioutil.ReadAll(r.Body)
+		logBoth("[%s]%s %d %s %s %s", r.Method, r.RemoteAddr, claims.Uid, claims.Username, r.URL.Path, string(buf))
+		reader := ioutil.NopCloser(bytes.NewBuffer(buf))
+		r.Body = reader
 		next.ServeHTTP(w, r)
 	})
 }
@@ -197,8 +203,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%s Token refresh success: uid: %d username: %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.RemoteAddr)
-	fmt.Fprintf(sysLog, "%s Token refresh success: uid: %d username: %s from %s\n", time.Now().Format(time.UnixDate), body.Uid, body.Username, r.RemoteAddr)
+	logBoth("[LOGIN]Token refresh success: uid: %d username: %s from %s\n", body.Uid, body.Username, r.RemoteAddr)
 
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
