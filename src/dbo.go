@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/google/uuid"
 	"reflect"
+	"strings"
 )
 
 func getUidByUsernameAndPassword(username string, password string) int {
@@ -589,79 +591,72 @@ func deleteTicket(id int) bool {
 }
 
 func getDutyCalender() *DutyCalender {
-	stmt, err := db.Prepare("select name, user, username from duty_v2, user where user = uid")
+	stmt, err := db.Prepare("select id, user.uid, day, username from duty_v3, user where duty_v3.uid = user.uid")
 	if err != nil {
 		return nil
 	}
-	var dutyCalender DutyCalender
 	defer stmt.Close()
+	var dutyCalender DutyCalender
 	rows, err := stmt.Query()
 	if err != nil {
 		return nil
 	}
 	for rows.Next() {
-		var uid int
+		var dutyUser DutyUser
 		var day string
-		var username string
-		rows.Scan(&day, &uid, &username)
+		rows.Scan(&dutyUser.Id, &dutyUser.Uid, &day, &dutyUser.Username)
 		switch day {
-		case "Monday1":
-			dutyCalender.Monday1 = uid
-			dutyCalender.Monday1Name = username
-		case "Monday2":
-			dutyCalender.Monday2 = uid
-			dutyCalender.Monday2Name = username
-		case "Monday3":
-			dutyCalender.Monday3 = uid
-			dutyCalender.Monday3Name = username
-		case "Tuesday1":
-			dutyCalender.Tuesday1 = uid
-			dutyCalender.Tuesday1Name = username
-		case "Tuesday2":
-			dutyCalender.Tuesday2 = uid
-			dutyCalender.Tuesday2Name = username
-		case "Tuesday3":
-			dutyCalender.Tuesday3 = uid
-			dutyCalender.Tuesday3Name = username
-		case "Wednesday1":
-			dutyCalender.Wednesday1 = uid
-			dutyCalender.Wednesday1Name = username
-		case "Wednesday2":
-			dutyCalender.Wednesday2 = uid
-			dutyCalender.Wednesday2Name = username
-		case "Wednesday3":
-			dutyCalender.Wednesday3 = uid
-			dutyCalender.Wednesday3Name = username
-		case "Thursday1":
-			dutyCalender.Thursday1 = uid
-			dutyCalender.Thursday1Name = username
-		case "Thursday2":
-			dutyCalender.Thursday2 = uid
-			dutyCalender.Thursday2Name = username
-		case "Thursday3":
-			dutyCalender.Thursday3 = uid
-			dutyCalender.Thursday3Name = username
-		case "Friday1":
-			dutyCalender.Friday1 = uid
-			dutyCalender.Friday1Name = username
-		case "Friday2":
-			dutyCalender.Friday2 = uid
-			dutyCalender.Friday2Name = username
-		case "Friday3":
-			dutyCalender.Friday3 = uid
-			dutyCalender.Friday3Name = username
+		case "Monday":
+			dutyCalender.Monday = append(dutyCalender.Monday, dutyUser)
+		case "Tuesday":
+			dutyCalender.Tuesday = append(dutyCalender.Tuesday, dutyUser)
+		case "Wednesday":
+			dutyCalender.Wednesday = append(dutyCalender.Wednesday, dutyUser)
+		case "Thursday":
+			dutyCalender.Thursday = append(dutyCalender.Thursday, dutyUser)
+		case "Friday":
+			dutyCalender.Friday = append(dutyCalender.Friday, dutyUser)
+		case "Saturday":
+			dutyCalender.Saturday = append(dutyCalender.Saturday, dutyUser)
+		case "Sunday":
+			dutyCalender.Sunday = append(dutyCalender.Sunday, dutyUser)
 		}
 	}
 	return &dutyCalender
 }
 
-func setDutyCalender(pos string, user int) bool {
-	stmt, err := db.Prepare("update duty_v2 set user = ? where name = ?")
+func addDutyCalender(day string, uid int) bool {
+	stmt, err := db.Prepare("insert into duty_v3 (id, day, uid) values (?, ?, ?)")
 	if err != nil {
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(user, pos)
+	_, err = stmt.Exec(strings.Replace(uuid.NewString(), "-", "", -1), day, uid)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func updateDutyCalender(day string, uid int, id string) bool {
+	stmt, err := db.Prepare("update duty_v3 set day = ?, uid = ? where id = ?")
+	if err != nil {
+		return false
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(day, uid, id)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func delDutyCalender(id string) bool {
+	stmt, err := db.Prepare("delete from duty_v3 where id = ?")
+	if err != nil {
+		return false
+	}
+	_, err = stmt.Exec(id)
 	if err != nil {
 		return false
 	}

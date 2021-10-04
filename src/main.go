@@ -68,7 +68,7 @@ func main() {
 	// 发送教室控制命令
 	mux.Handle("/api/v2/sendCmd", VerifyHeader(http.HandlerFunc(HandleCmd)))
 	// 增加 Ticket
-	mux.Handle("/api/v2/addTicket",VerifyHeader(http.HandlerFunc(AddTicket)))
+	mux.Handle("/api/v2/addTicket", VerifyHeader(http.HandlerFunc(AddTicket)))
 	// 返回我的工单
 	mux.Handle("/api/v2/getMyTicket", VerifyHeader(http.HandlerFunc(GetUserDutyTicket)))
 	// 返回全部工单 动态确定获取条数
@@ -78,10 +78,10 @@ func main() {
 	mux.Handle("/api/v2/admin/setTicketDutyUser", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetTicketDutyUser))))
 	mux.Handle("/api/v2/admin/deleteTicket", VerifyHeader(VerifyAdmin(http.HandlerFunc(DeleteTicket))))
 	mux.Handle("/api/v2/setTicketStatus", VerifyHeader(http.HandlerFunc(SetTicketStatus)))
+	// 查看值班表
+	mux.Handle("/api/v2/getDuty", VerifyHeader(http.HandlerFunc(GetDutyCalender)))
 	// 修改值班表
-	mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDutyCalenderUser))))
-	// 获得值班表
-	mux.Handle("/api/v2/getDutyCalendar", VerifyHeader(http.HandlerFunc(GetDutyCalender)))
+	mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDutyCalender))))
 	logBoth("Server listen on 63112")
 	log.Panic(http.ListenAndServe(":63112", mux))
 }

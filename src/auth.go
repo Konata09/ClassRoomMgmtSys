@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -86,6 +87,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 func VerifyHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json;charset=utf-8")
+		if strings.Contains(r.RemoteAddr, "127.0.0.1") {
+			next.ServeHTTP(w, r)
+			return
+		}
 		re := regexp.MustCompile(`Bearer\s(.*)$`)
 
 		headerAuth := r.Header.Get("Authorization")
@@ -111,9 +117,6 @@ func VerifyHeader(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json;charset=utf-8")
-
-
 		buf, _ := ioutil.ReadAll(r.Body)
 		logBoth("[%s]%s %d %s %s %s", r.Method, r.RemoteAddr, claims.Uid, claims.Username, r.URL.Path, string(buf))
 		reader := ioutil.NopCloser(bytes.NewBuffer(buf))
@@ -126,7 +129,6 @@ func VerifyAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := getUserInfoFromJWT(r)
 		if user.Isadmin == true {
-			w.Header().Set("Content-Type", "application/json;charset=utf-8")
 			next.ServeHTTP(w, r)
 		} else {
 			ApiErrMsg(w, "权限不足")
