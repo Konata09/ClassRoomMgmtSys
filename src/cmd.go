@@ -26,6 +26,7 @@ type SendCmd struct {
 	ClassId int    `json:"class_id"`
 	CmdName string `json:"cmd_name"`
 	CmdId   int    `json:"cmd_id"`
+	ClassName string `json:"class_name"`
 }
 
 func HandleCmd(w http.ResponseWriter, r *http.Request) {
