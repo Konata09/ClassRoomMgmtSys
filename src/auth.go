@@ -127,7 +127,7 @@ func VerifyHeader(next http.Handler) http.Handler {
 
 func VerifyAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := getUserInfoFromJWT(r)
+		user := GetUserInfoFromJWT(r)
 		if user.Isadmin == true {
 			next.ServeHTTP(w, r)
 		} else {
@@ -136,7 +136,7 @@ func VerifyAdmin(next http.Handler) http.Handler {
 	})
 }
 
-func getUserInfoFromJWT(r *http.Request) *User {
+func GetUserInfoFromJWT(r *http.Request) *User {
 	re := regexp.MustCompile(`Bearer\s(.*)$`)
 	headerAuth := r.Header.Get("Authorization")
 	tknStr := re.FindStringSubmatch(headerAuth)

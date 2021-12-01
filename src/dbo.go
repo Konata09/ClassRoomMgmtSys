@@ -551,13 +551,13 @@ func getUserDutyTicketOverview(id int) []TicketOverview {
 	return ticketOverviews
 }
 
-func setTicketStatus(id int, status int) bool {
-	stmt, err := db.Prepare("update ticket set status = ? where id = ?")
+func setTicketDone(id int, status int, user int, time string) bool {
+	stmt, err := db.Prepare("update ticket set status = ? , completeuser = ? , completetime = ? where id = ?")
 	if err != nil {
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(status, id)
+	_, err = stmt.Exec(status, user, time, id)
 	if err != nil {
 		return false
 	}

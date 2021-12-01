@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type TicketOverview struct {
@@ -55,7 +56,6 @@ func AddTicket(w http.ResponseWriter, r *http.Request) {
 	}
 	var ticket Ticket
 	json.NewDecoder(r.Body).Decode(&ticket)
-	//ret := addTicket(ticket.Title, ticket.Detail, ticket.Severity, ticket.ClassId, ticket.CreateUser, ticket.DutyUser1, ticket.DutyUser2, ticket.DutyUser3, ticket.CreateTime, ticket.StartTime)
 	ret := addTicket(ticket.Title, ticket.Detail, ticket.Severity, ticket.Place, ticket.CreateUser, ticket.DutyUser1, ticket.DutyUser2, ticket.DutyUser3, ticket.CreateTime, ticket.StartTime)
 	if ret {
 		ApiOk(w)
@@ -174,7 +174,7 @@ func DeleteTicket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SetTicketStatus(w http.ResponseWriter, r *http.Request) {
+func SetTicketDone(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -185,7 +185,8 @@ func SetTicketStatus(w http.ResponseWriter, r *http.Request) {
 		ApiErr(w)
 		return
 	}
-	ret := setTicketStatus(ticket.Id, ticket.Status)
+	user := GetUserInfoFromJWT(r)
+	ret := setTicketDone(ticket.Id, ticket.Status, user.Uid, time.Now().Format("2006-01-02 15:04"))
 	if ret {
 		ApiOk(w)
 		return

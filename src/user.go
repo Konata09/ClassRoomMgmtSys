@@ -43,7 +43,7 @@ func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	user := getUserInfoFromJWT(r)
+	user := GetUserInfoFromJWT(r)
 	var body ChangePasswordBody
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {

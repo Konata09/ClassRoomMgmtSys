@@ -168,6 +168,10 @@ func GetClassroomDetail(w http.ResponseWriter, r *http.Request) {
 			case 8: // ScreenEncoder
 				cam.RtspAddr = fmt.Sprintf("rtsp://%s/stream", device.DeviceIp)
 				break
+			case 9: // Teacher Physical PTZ
+			case 10: // Student Physical PTZ
+				cam.RtspAddr = fmt.Sprintf("rtsp://%s/live/av0", device.DeviceIp)
+				break
 			}
 			cameras = append(cameras, cam)
 		}
