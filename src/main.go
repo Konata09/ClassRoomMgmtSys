@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/syslog"
 	"net/http"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var jwtKey = []byte("sd*ust#konata&2O20")
