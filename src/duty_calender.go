@@ -7,19 +7,19 @@ import (
 
 type DutyUser struct {
 	Id       string `json:"id"`
-	Day      string `json:"day,omitempty"`
-	Uid      int    `json:"uid,omitempty"`
-	Username string `json:"username,omitempty"`
+	Day      string `json:"day"`
+	Uid      int    `json:"uid"`
+	Username string `json:"username"`
 }
 
 type DutyCalender struct {
-	Monday    []DutyUser `json:"monday,omitempty"`
-	Tuesday   []DutyUser `json:"tuesday,omitempty"`
-	Wednesday []DutyUser `json:"wednesday,omitempty"`
-	Thursday  []DutyUser `json:"thursday,omitempty"`
-	Friday    []DutyUser `json:"friday,omitempty"`
-	Saturday  []DutyUser `json:"saturday,omitempty"`
-	Sunday    []DutyUser `json:"sunday,omitempty"`
+	Monday    []DutyUser `json:"monday"`
+	Tuesday   []DutyUser `json:"tuesday"`
+	Wednesday []DutyUser `json:"wednesday"`
+	Thursday  []DutyUser `json:"thursday"`
+	Friday    []DutyUser `json:"friday"`
+	Saturday  []DutyUser `json:"saturday"`
+	Sunday    []DutyUser `json:"sunday"`
 }
 
 func GetDutyCalender(w http.ResponseWriter, r *http.Request)  {

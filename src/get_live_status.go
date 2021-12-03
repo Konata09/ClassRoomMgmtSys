@@ -12,13 +12,13 @@ import (
 )
 
 type Reserve struct {
-	RoomName      string `json:"room-name,omitempty"`       // 教室名称
-	Name          string `json:"name,omitempty"`            // 课程名称
-	TeacherName   string `json:"teacher-name,omitempty"`    // 教师姓名
-	ReserveStatus int    `json:"reserve-status,omitempty"`  // 1:进行中 0:未开始 2:已完成
-	IsLive        int    `json:"is-live,omitempty"`         // 是否直播
-	IsRecordFile  int    `json:"is-record-file,omitempty"`  // 是否录制
-	IsAutoPublish int    `json:"is-auto-publish,omitempty"` // 是否自动发布
+	RoomName      string `json:"room-name"`       // 教室名称
+	Name          string `json:"name"`            // 课程名称
+	TeacherName   string `json:"teacher-name"`    // 教师姓名
+	ReserveStatus int    `json:"reserve-status"`  // 1:进行中 0:未开始 2:已完成
+	IsLive        int    `json:"is-live"`         // 是否直播
+	IsRecordFile  int    `json:"is-record-file"`  // 是否录制
+	IsAutoPublish int    `json:"is-auto-publish"` // 是否自动发布
 }
 
 var sessionID = ""

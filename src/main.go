@@ -1,17 +1,21 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"log/syslog"
 	"net/http"
+	"time"
 )
 
 var jwtKey = []byte("sd*ust#konata&2O20")
 var db *sql.DB
 var sysLog *syslog.Writer
+var rdb *redis.Client
 
 func initDBConn() {
 	var err error
@@ -38,15 +42,32 @@ func initSyslog() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println("ClassRoomMgmtSys server is restarted.")
-	sysLog.Warning("ClassRoomMgmtSys server is restarted.")
+	fmt.Println("ClassRoomMgmtSys server was restarted.")
+	sysLog.Warning("ClassRoomMgmtSys server was restarted.")
+}
+
+func initRedisConn() {
+	rdb = redis.NewClient(&redis.Options{
+		Addr:        "127.0.0.1:6379",
+		Password:    "", // no password set
+		DB:          0,  // use default DB
+		DialTimeout: 2 * time.Second,
+		ReadTimeout: 2 * time.Second,
+	})
+
+	_, err := rdb.Ping(context.Background()).Result()
+	if err != nil {
+		logBoth("Connect to Redis Failed %s", err)
+		panic(err)
+	}
 }
 
 func main() {
 	initDBConn()
+	go initRedisConn()
 	initSyslog()
-	dyLogin()
-	getLiveStatusFromDy()
+	//dyLogin()
+	//getLiveStatusFromDy()
 	mux := http.NewServeMux()
 	mux.Handle("/api/v2/login", http.HandlerFunc(Login))
 	mux.Handle("/api/v2/refresh", http.HandlerFunc(RefreshToken))
