@@ -24,7 +24,7 @@ func pingSingle(ip string, id int, c chan DetectRes) {
 		c <- pingres
 		return
 	}
-	pinger.Timeout = 1 * time.Second
+	pinger.Timeout = time.Second * 2
 	pinger.Count = 1
 	err = pinger.Run() // Blocks until finished.
 	if err != nil {
@@ -63,7 +63,7 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 
 	pc, err := net.ListenUDP("udp4", nil)
 	if err != nil {
-		fmt.Printf("%s when getControollerStatus from %s\n", err, ip)
+		logBoth("[ERR] %s when getControollerStatus ListenUDP from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
@@ -71,23 +71,27 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 	defer pc.Close()
 	addr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", ip, 4001))
 	if err != nil {
-		fmt.Printf("%s when getControollerStatus from %s\n", err, ip)
+		logBoth("[ERR] %s when getControollerStatus ResolveUDPAddr from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
 	}
 	_, err = pc.WriteTo(controllerQueryPayload, addr)
 	if err != nil {
-		fmt.Printf("%s when getControollerStatus from %s\n", err, ip)
+		logBoth("[ERR] %s when getControollerStatus WriteTo from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
 	}
 	buf := make([]byte, 8)
-	pc.SetReadDeadline(time.Now().Add(time.Second * 1))
+	err = pc.SetReadDeadline(time.Now().Add(time.Second * 1))
+	if err != nil {
+		fmt.Printf("SetReadDeadline Fail %s",err)
+		return
+	}
 	_, _, err = pc.ReadFrom(buf)
 	if err != nil {
-		fmt.Printf("%s when getControollerStatus from %s\n", err, ip)
+		logBoth("[ERR] %s when getControollerStatus ReadFrom from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return

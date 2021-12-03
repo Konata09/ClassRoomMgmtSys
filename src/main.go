@@ -3,10 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"log/syslog"
 	"net/http"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var jwtKey = []byte("sd*ust#konata&2O20")
@@ -28,9 +28,10 @@ func initSyslog() {
 	var serverAddr string
 	ret := getPreference("syslog_server", &serverAddr)
 	if !ret {
-		log.Fatal("syslog server not configured!")
+		log.Fatal("Syslog server is not configured!")
+		return
 	}
-	fmt.Printf("syslog server: %s\n", serverAddr)
+	fmt.Printf("Syslog server is %s\n", serverAddr)
 	var err error
 	sysLog, err = syslog.Dial("udp", serverAddr, syslog.LOG_NOTICE|syslog.LOG_USER, "ClassroomMgmtSys")
 	if err != nil {
@@ -44,6 +45,8 @@ func initSyslog() {
 func main() {
 	initDBConn()
 	initSyslog()
+	dyLogin()
+	getLiveStatusFromDy()
 	mux := http.NewServeMux()
 	mux.Handle("/api/v2/login", http.HandlerFunc(Login))
 	mux.Handle("/api/v2/refresh", http.HandlerFunc(RefreshToken))
@@ -83,6 +86,6 @@ func main() {
 	mux.Handle("/api/v2/getDuty", VerifyHeader(http.HandlerFunc(GetDutyCalender)))
 	// 修改值班表
 	mux.Handle("/api/v2/setDuty", VerifyHeader(VerifyAdmin(http.HandlerFunc(SetDutyCalender))))
-	logBoth("Server listen on 63112")
+	logBoth("[INFO] Server listen on 63112")
 	log.Panic(http.ListenAndServe(":63112", mux))
 }
