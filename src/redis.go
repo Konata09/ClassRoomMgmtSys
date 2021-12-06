@@ -35,11 +35,22 @@ func GetSingleStatusFromRedis(classroomId int) *ClassroomRedisStatus {
 		logBoth("%s when GetSingleStatusFromRedis ClassroomId: %d", err, classroomId)
 		return nil
 	}
-
 	var redisStatus ClassroomRedisStatus
-
 	json.Unmarshal([]byte(res), &redisStatus)
 	return &redisStatus
+}
+func SetAllStatusFromRedis(status []ClassroomRedisStatus) {
+	ctx := context.Background()
+	var classes []string
+	for _, oneClass := range status {
+		marshal, _ := json.Marshal(oneClass)
+		classes = append(classes, fmt.Sprintf("c%d", oneClass.ClassroomId))
+		classes = append(classes, string(marshal))
+	}
+	_, err := rdb.MSet(ctx, classes).Result()
+	if err != nil {
+		logBoth("%s when SetAllStatusFromRedis", err)
+	}
 }
 
 func GetAllStatusFromRedis() []ClassroomRedisStatus {
@@ -47,21 +58,28 @@ func GetAllStatusFromRedis() []ClassroomRedisStatus {
 	classrooms := getClassrooms()
 	var rooms []string
 	for _, classroom := range classrooms {
-		rooms = append(rooms, string(classroom.Id))
+		rooms = append(rooms, fmt.Sprintf("c%d", classroom.Id))
 	}
 
 	result, err := rdb.MGet(ctx, rooms...).Result()
 	if err != nil {
 		logBoth("%s when GetAllStatusFromRedis", err)
-		//return nil
 	}
 
 	var redisStatusAll []ClassroomRedisStatus
-	for _, classroom := range result {
-		fmt.Printf("%v\n", classroom)
+	for i, classroom := range result {
 		var redisStatus ClassroomRedisStatus
-		json.Unmarshal([]byte(classroom.(string)), &redisStatus) // interface 转 string
-		redisStatusAll = append(redisStatusAll, redisStatus)
+		if classroom != nil {
+			fmt.Printf("%v\n", classroom)
+			err := json.Unmarshal([]byte(classroom.(string)), &redisStatus) // interface 转 string
+			if err != nil {
+				logBoth("%s when GetAllStatusFromRedis ClassroomId: %d", err, i+1)
+				continue
+			}
+			redisStatusAll = append(redisStatusAll, redisStatus)
+		} else {
+			logBoth("GetAllStatusFromRedis return nil ClassroomId: %d", i+1)
+		}
 	}
 	return redisStatusAll
 }

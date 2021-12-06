@@ -66,6 +66,59 @@ func main() {
 	initDBConn()
 	go initRedisConn()
 	initSyslog()
+	SetAllStatusFromRedis([]ClassroomRedisStatus{{
+		ClassroomId:   1,
+		ClassroomName: "asd",
+		CourseName:    "安师傅",
+		TeacherName:   "asd",
+		ReserveStatus: 3,
+		IsLive:        4,
+		IsRecordFile:  5,
+		IsAutoPublish: 7,
+		DeviceStatus: []DeviceStatus{{
+			Id:     2,
+			Ping:   2,
+			Status: 2,
+		}, {
+			Id:     3,
+			Ping:   3,
+			Status: 34,
+		}},
+	}, {
+		ClassroomId:   4,
+		ClassroomName: "上方",
+		CourseName:    "33",
+		TeacherName:   "asd",
+		ReserveStatus: 3,
+		IsLive:        4,
+		IsRecordFile:  6,
+		IsAutoPublish: 7,
+		DeviceStatus:  nil,
+	}})
+	SetSingleStatusToRedis(&ClassroomRedisStatus{
+		ClassroomId:   5,
+		ClassroomName: "asd",
+		CourseName:    "地方试试",
+		TeacherName:   "sds",
+		ReserveStatus: 33,
+		IsLive:        4,
+		IsRecordFile:  2,
+		IsAutoPublish: 4,
+		DeviceStatus: []DeviceStatus{
+			{
+				Id:     4,
+				Ping:   34,
+				Status: 4,
+			}, {
+				Id:     6,
+				Ping:   9,
+				Status: -1,
+			},
+		},
+	})
+	fromRedis := GetAllStatusFromRedis()
+	fmt.Printf("%v\n", fromRedis)
+	fmt.Printf("%v", GetSingleStatusFromRedis(5))
 	//dyLogin()
 	//getLiveStatusFromDy()
 	mux := http.NewServeMux()

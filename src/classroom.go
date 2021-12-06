@@ -65,59 +65,13 @@ func GetClassrooms(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	var enPing = true
-	ParamPing := r.URL.Query().Get("ping")
-	if ParamPing == "false" {
-		enPing = false
-	}
+	//var enPing = true
+	//ParamPing := r.URL.Query().Get("ping")
+	//if ParamPing == "false" {
+	//	enPing = false
+	//}
+
 	classrooms := getClassrooms()
-	if enPing {
-		done := make(chan int)
-		lindges := getClassroomLindges()
-		controllers := getClassroomControllers()
-		go pingDevices(lindges, done)              // 1
-		go getControllersStatus(controllers, done) // 2
-		doneOk1 := <-done
-		if doneOk1 == 1 {
-			for _, lindge := range lindges {
-				for i, classroom := range classrooms {
-					if classroom.Id == lindge.DeviceClassId {
-						classrooms[i].Lindge = lindge.pingRes
-						break
-					}
-				}
-			}
-		} else if doneOk1 == 2 {
-			for _, controller := range controllers {
-				for i, classroom := range classrooms {
-					if classroom.Id == controller.DeviceClassId {
-						classrooms[i].Controller = controller.status
-						break
-					}
-				}
-			}
-		}
-		doneOk2 := <-done
-		if doneOk2 == 1 {
-			for _, lindge := range lindges {
-				for i, classroom := range classrooms {
-					if classroom.Id == lindge.DeviceClassId {
-						classrooms[i].Lindge = lindge.pingRes
-						break
-					}
-				}
-			}
-		} else if doneOk2 == 2 {
-			for _, controller := range controllers {
-				for i, classroom := range classrooms {
-					if classroom.Id == controller.DeviceClassId {
-						classrooms[i].Controller = controller.status
-						break
-					}
-				}
-			}
-		}
-	}
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",

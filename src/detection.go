@@ -86,7 +86,7 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 	buf := make([]byte, 8)
 	err = pc.SetReadDeadline(time.Now().Add(time.Second * 1))
 	if err != nil {
-		fmt.Printf("SetReadDeadline Fail %s",err)
+		fmt.Printf("SetReadDeadline Fail %s", err)
 		return
 	}
 	_, _, err = pc.ReadFrom(buf)
@@ -149,4 +149,44 @@ func getControllersStatus(devices []Device, done chan int) {
 		devices[detectRes.id].status = detectRes.res
 	}
 	done <- 2
+}
+
+/**
+  查询所有教室基本状态(中控 云盒 录直播)
+*/
+func getAllClassroomStatus() {
+	classrooms := getClassrooms()
+	done := make(chan int)
+	lindges := getClassroomLindges()
+	controllers := getClassroomControllers()
+	go pingDevices(lindges, done)              // ping所有云盒 doneId:1
+	go getControllersStatus(controllers, done) // 查询所有中控状态 doneId:2
+	for i := 0; i < 2; i++ {
+		doneId := <-done
+		if doneId == 1 {
+			for _, lindge := range lindges {
+				for i, classroom := range classrooms {
+					if classroom.Id == lindge.DeviceClassId {
+						classrooms[i].Lindge = lindge.pingRes
+						break
+					}
+				}
+			}
+
+		} else if doneId == 2 {
+			for _, controller := range controllers {
+				for i, classroom := range classrooms {
+					if classroom.Id == controller.DeviceClassId {
+						classrooms[i].Controller = controller.status
+						break
+					}
+				}
+			}
+		}
+	}
+	//liveStatus := getLiveStatusFromDy() // 获取录直播状态
+}
+
+func handleStatusResults(doneId int, devices []Device) {
+
 }
