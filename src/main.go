@@ -24,7 +24,7 @@ func initDBConn() {
 		log.Fatal(err)
 	}
 	if db == nil {
-		log.Fatal("Error open database.")
+		log.Fatal("[ERR] Error open database.")
 	}
 }
 
@@ -32,18 +32,18 @@ func initSyslog() {
 	var serverAddr string
 	ret := getPreference("syslog_server", &serverAddr)
 	if !ret {
-		log.Fatal("Syslog server is not configured!")
+		log.Fatal("[ERR] Syslog server is not configured!")
 		return
 	}
-	fmt.Printf("Syslog server is %s\n", serverAddr)
+	fmt.Printf("[INFO] Syslog server is %s\n", serverAddr)
 	var err error
 	sysLog, err = syslog.Dial("udp", serverAddr, syslog.LOG_NOTICE|syslog.LOG_USER, "ClassroomMgmtSys")
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println("ClassRoomMgmtSys server was restarted.")
-	sysLog.Warning("ClassRoomMgmtSys server was restarted.")
+	fmt.Println("[WARN] ClassRoomMgmtSys Restarted")
+	sysLog.Warning("[WARN] ClassRoomMgmtSys Restarted")
 }
 
 func initRedis() {
@@ -70,6 +70,7 @@ func initRedis() {
 		redisStatuses = append(redisStatuses, redisStatus)
 	}
 	SetMultiClassroomStatusToRedis(redisStatuses)
+	logBoth("[INFO] Redis flushed")
 }
 
 func test() {

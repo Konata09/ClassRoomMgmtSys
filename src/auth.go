@@ -75,7 +75,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	logBoth("[LOGIN]Login success: %d %s from %s", uid, creds.Username, r.RemoteAddr)
+	logBoth("[LOGIN] Login success: %d %s from %s", uid, creds.Username, r.RemoteAddr)
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",
@@ -118,7 +118,7 @@ func VerifyHeader(next http.Handler) http.Handler {
 			return
 		}
 		buf, _ := ioutil.ReadAll(r.Body)
-		logBoth("[%s]%s %d %s %s %s", r.Method, r.RemoteAddr, claims.Uid, claims.Username, r.URL.Path, string(buf))
+		logBoth("[%s] %s %d %s %s %s", r.Method, r.RemoteAddr, claims.Uid, claims.Username, r.URL.Path, string(buf))
 		reader := ioutil.NopCloser(bytes.NewBuffer(buf))
 		r.Body = reader
 		next.ServeHTTP(w, r)
@@ -205,7 +205,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	logBoth("[LOGIN]Token refresh success: uid: %d username: %s from %s", body.Uid, body.Username, r.RemoteAddr)
+	logBoth("[LOGIN] Token refresh success: uid: %d username: %s from %s", body.Uid, body.Username, r.RemoteAddr)
 
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,

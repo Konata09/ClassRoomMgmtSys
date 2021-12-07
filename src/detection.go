@@ -16,7 +16,7 @@ type DetectRes struct {
 var controllerQueryPayload = []byte("\x4c\x69\x67\x68\x74\x6f\x6e\xfe\x08\x14\x0a\x00\x26\xff")
 
 func pingSingle(ip string, id int, c chan DetectRes) {
-	time.Sleep(time.Duration(getRandomInt(0, 300)) * time.Millisecond) // 0-1秒随机延时
+	time.Sleep(time.Duration(getRandomInt(0, 300)) * time.Millisecond) // 0-0.3秒随机延时
 	var pingres DetectRes
 	pingres.id = id
 	pinger, err := ping.NewPinger(ip)
@@ -59,8 +59,9 @@ func pingDevices(devices []Device, done chan int) {
 	done <- 1
 }
 
+// id 不是 DeviceId
 func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
-	time.Sleep(time.Duration(getRandomInt(0, 300)) * time.Millisecond) // 0-1秒随机延时
+	time.Sleep(time.Duration(getRandomInt(0, 300)) * time.Millisecond) // 0-0.3秒随机延时
 	var pingres DetectRes
 	pingres.id = id
 
@@ -256,7 +257,9 @@ func fetchSingleClassroomDeviceStatus(classId int) {
 		}
 	}
 	go pingDevices(devices, doneDevice)
-	go getControllerStatusSingle(controllerIp, 1, doneController)
+	if controllerIp != "" {
+		go getControllerStatusSingle(controllerIp, -1, doneController)
+	}
 	var classroomStatus ClassroomStatus
 	classroomStatus.Id = classId
 	var devStatus []DeviceStatus
