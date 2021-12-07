@@ -108,29 +108,17 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 		3 WAIT
 		4 Unkonwn
 	*/
-	if buf[4] == '\x12' && buf[5] == '\x70' {
+	if buf[4] == '\x02' {
 		pingres.res = 1
-	} else if buf[4] == '\x02' && buf[5] == '\x60' {
+	} else if buf[4] == '\x12' {
 		pingres.res = 1
-	} else if buf[4] == '\x02' && buf[5] == '\x70' {
+	} else if buf[4] == '\x52' {
 		pingres.res = 1
-	} else if buf[4] == '\x00' && buf[5] == '\x00' {
+	} else if buf[4] == '\x00' {
 		pingres.res = 2
-	} else if buf[4] == '\x00' && buf[5] == '\x05' {
+	} else if buf[4] == '\x10' {
 		pingres.res = 2
-	} else if buf[4] == '\x00' && buf[5] == '\x10' {
-		pingres.res = 2
-	} else if buf[4] == '\x00' && buf[5] == '\x60' {
-		pingres.res = 2
-	} else if buf[4] == '\x10' && buf[5] == '\x00' {
-		pingres.res = 2
-	} else if buf[4] == '\x03' && buf[5] == '\x20' {
-		pingres.res = 3
-	} else if buf[4] == '\x03' && buf[5] == '\x30' {
-		pingres.res = 3
-	} else if buf[4] == '\x03' && buf[5] == '\x60' {
-		pingres.res = 3
-	} else if buf[4] == '\x03' && buf[5] == '\x70' {
+	} else if buf[4] == '\x03' {
 		pingres.res = 3
 	} else {
 		pingres.res = 4

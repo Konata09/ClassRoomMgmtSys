@@ -177,6 +177,7 @@ func GetClassroomStatus(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	go fetchSingleClassroomDeviceStatus(classId)
 	redis := GetSingleClassroomStatusFromRedis(classId)
 	var classroomStatus ClassroomStatus
 	classroomStatus.DeviceStatus = redis.DeviceStatus
