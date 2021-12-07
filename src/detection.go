@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-ping/ping"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -172,7 +173,6 @@ func getAllClassroomStatus() {
 					}
 				}
 			}
-
 		} else if doneId == 2 {
 			for _, controller := range controllers {
 				for i, classroom := range classrooms {
@@ -184,9 +184,54 @@ func getAllClassroomStatus() {
 			}
 		}
 	}
-	//liveStatus := getLiveStatusFromDy() // 获取录直播状态
-}
-
-func handleStatusResults(doneId int, devices []Device) {
-
+	liveStatus := getLiveStatusFromDy() // 获取录直播状态
+	for _, reserve := range liveStatus {
+		if strings.Contains(reserve.RoomName, "1-") {
+			ZhuLouNum := strings.Replace(reserve.RoomName, "1-", "", 1)
+			for i, classroom := range classrooms {
+				if classroom.Name == ZhuLouNum && strings.Contains(classroom.GroupName, "主教学楼") {
+					classrooms[i].Live = reserve.IsLive != 0
+					classrooms[i].Rec = reserve.IsRecordFile != 0 && reserve.IsAutoPublish != 0
+					classrooms[i].CourseName = reserve.Name
+					classrooms[i].TeacherName = reserve.TeacherName
+					break
+				}
+			}
+			fmt.Printf("rec: %v\n",classrooms)
+		} else if strings.Contains(reserve.RoomName, "3-") {
+			DongLouNum := strings.Replace(reserve.RoomName, "3-", "", 1)
+			for i, classroom := range classrooms {
+				if classroom.Name == DongLouNum && strings.Contains(classroom.GroupName, "东办公楼") {
+					classrooms[i].Live = reserve.IsLive != 0
+					classrooms[i].Rec = reserve.IsRecordFile != 0 && reserve.IsAutoPublish != 0
+					classrooms[i].CourseName = reserve.Name
+					classrooms[i].TeacherName = reserve.TeacherName
+					break
+				}
+			}
+		} else if strings.Contains(reserve.RoomName, "图") {
+			TuShuGuanNum := strings.Replace(strings.Replace(strings.Replace(strings.Replace(reserve.RoomName, "图书馆（济南）-图", "合班教室", 1), "一", "1", 1), "二", "2", 1), "三", "3", 1)
+			for i, classroom := range classrooms {
+				if classroom.Name == TuShuGuanNum {
+					classrooms[i].Live = reserve.IsLive != 0
+					classrooms[i].Rec = reserve.IsRecordFile != 0 && reserve.IsAutoPublish != 0
+					classrooms[i].CourseName = reserve.Name
+					classrooms[i].TeacherName = reserve.TeacherName
+					break
+				}
+			}
+		}
+	}
+	var redisStatuses []ClassroomRedisStatus
+	for _, classroom := range classrooms {
+		var redisStatus ClassroomRedisStatus
+		redisStatus.ClassroomId = classroom.Id
+		redisStatus.ClassroomName = classroom.Name
+		redisStatus.CourseName = classroom.CourseName
+		redisStatus.TeacherName = classroom.TeacherName
+		redisStatus.IsLive = b2i(classroom.Live)
+		redisStatus.IsRecord = b2i(classroom.Rec)
+		redisStatuses = append(redisStatuses, redisStatus)
+	}
+	SetMultiClassroomStatusToRedis(redisStatuses)
 }

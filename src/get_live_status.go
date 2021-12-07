@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -75,7 +74,7 @@ func getLiveStatusFromDy() []Reserve {
 	req.Header.Add("Cookie", sessionID)
 	req.Header.Add("Cache-Control", "no-cache")
 
-	client.Timeout = time.Second * 2
+	client.Timeout = time.Second * 3
 	res, err := client.Do(req)
 	if err != nil {
 		logBoth("[ERR] %s when getLiveStatusFromDy DoRequest", err)
@@ -93,6 +92,5 @@ func getLiveStatusFromDy() []Reserve {
 		logBoth("[ERR] %s when getLiveStatusFromDy DecodeJson %s", err, res.Body)
 		return nil
 	}
-	fmt.Println(reserves)
 	return reserves
 }

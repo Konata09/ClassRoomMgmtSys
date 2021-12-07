@@ -113,3 +113,10 @@ func logBoth(format string, a ...interface{}) {
 	sysLog.Info(gbkStr)
 	fmt.Println(logStr)
 }
+
+func b2i(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}

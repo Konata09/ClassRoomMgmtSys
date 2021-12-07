@@ -8,14 +8,17 @@ import (
 )
 
 type Classroom struct {
-	Id         int    `json:"id"`
-	Name       string `json:"name"`
-	GroupId    int    `json:"group_id"`
-	GroupName  string `json:"group_name"`
-	Controller int    `json:"controller"`
-	Lindge     int    `json:"lindge"`
-	Live       bool   `json:"live"`
-	Rec        bool   `json:"rec"`
+	Id            int    `json:"id"`
+	Name          string `json:"name"`
+	GroupId       int    `json:"group_id"`
+	GroupName     string `json:"group_name"`
+	Controller    int    `json:"controller"`
+	Lindge        int    `json:"lindge"`
+	Live          bool   `json:"live"`
+	Rec           bool   `json:"rec"`
+	// 下面的字段只用于存储到 Redis 中
+	CourseName    string `json:"course_name"`
+	TeacherName   string `json:"teacher_name"`
 }
 
 type AllClassroom struct {

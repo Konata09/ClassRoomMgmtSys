@@ -46,7 +46,7 @@ func initSyslog() {
 	sysLog.Warning("ClassRoomMgmtSys server was restarted.")
 }
 
-func initRedisConn() {
+func initRedis() {
 	rdb = redis.NewClient(&redis.Options{
 		Addr:        "127.0.0.1:6379",
 		Password:    "", // no password set
@@ -60,67 +60,30 @@ func initRedisConn() {
 		logBoth("Connect to Redis Failed %s", err)
 		panic(err)
 	}
+	// 向 Redis 中存入教室基本信息
+	classrooms := getClassrooms()
+	var redisStatuses []ClassroomRedisStatus
+	for _, classroom := range classrooms {
+		var redisStatus ClassroomRedisStatus
+		redisStatus.ClassroomId = classroom.Id
+		redisStatus.ClassroomName = classroom.Name
+		redisStatuses = append(redisStatuses, redisStatus)
+	}
+	SetMultiClassroomStatusToRedis(redisStatuses)
+}
+
+func test() {
 }
 
 func main() {
 	initDBConn()
-	go initRedisConn()
+	go initRedis()
 	initSyslog()
-	SetAllStatusFromRedis([]ClassroomRedisStatus{{
-		ClassroomId:   1,
-		ClassroomName: "asd",
-		CourseName:    "安师傅",
-		TeacherName:   "asd",
-		ReserveStatus: 3,
-		IsLive:        4,
-		IsRecordFile:  5,
-		IsAutoPublish: 7,
-		DeviceStatus: []DeviceStatus{{
-			Id:     2,
-			Ping:   2,
-			Status: 2,
-		}, {
-			Id:     3,
-			Ping:   3,
-			Status: 34,
-		}},
-	}, {
-		ClassroomId:   4,
-		ClassroomName: "上方",
-		CourseName:    "33",
-		TeacherName:   "asd",
-		ReserveStatus: 3,
-		IsLive:        4,
-		IsRecordFile:  6,
-		IsAutoPublish: 7,
-		DeviceStatus:  nil,
-	}})
-	SetSingleStatusToRedis(&ClassroomRedisStatus{
-		ClassroomId:   5,
-		ClassroomName: "asd",
-		CourseName:    "地方试试",
-		TeacherName:   "sds",
-		ReserveStatus: 33,
-		IsLive:        4,
-		IsRecordFile:  2,
-		IsAutoPublish: 4,
-		DeviceStatus: []DeviceStatus{
-			{
-				Id:     4,
-				Ping:   34,
-				Status: 4,
-			}, {
-				Id:     6,
-				Ping:   9,
-				Status: -1,
-			},
-		},
-	})
-	fromRedis := GetAllStatusFromRedis()
-	fmt.Printf("%v\n", fromRedis)
-	fmt.Printf("%v", GetSingleStatusFromRedis(5))
+	getAllClassroomStatus()
+	fromRedis := GetAllClassroomStatusFromRedis()
+	fmt.Printf("%v",fromRedis)
+	//test()
 	//dyLogin()
-	//getLiveStatusFromDy()
 	mux := http.NewServeMux()
 	mux.Handle("/api/v2/login", http.HandlerFunc(Login))
 	mux.Handle("/api/v2/refresh", http.HandlerFunc(RefreshToken))

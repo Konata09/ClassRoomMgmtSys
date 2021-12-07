@@ -8,38 +8,43 @@ import (
 
 type ClassroomRedisStatus struct {
 	ClassroomId   int            `json:"classroom_id"`
-	ClassroomName string         `json:"classroom_name"`  // 教室名称
-	CourseName    string         `json:"course_name"`     // 课程名称
-	TeacherName   string         `json:"teacher_name"`    // 教师姓名
-	ReserveStatus int            `json:"reserve_status"`  // 1:进行中 0:未开始 2:已完成
-	IsLive        int            `json:"is_live"`         // 是否直播
-	IsRecordFile  int            `json:"is_record_file"`  // 是否录制
-	IsAutoPublish int            `json:"is_auto_publish"` // 是否自动发布
+	ClassroomName string         `json:"classroom_name"` // 教室名称
+	CourseName    string         `json:"course_name"`    // 课程名称
+	TeacherName   string         `json:"teacher_name"`   // 教师姓名
+	IsLive        int            `json:"is_live"`        // 是否直播
+	IsRecord      int            `json:"is_record"`      // 是否录制及自动发布
 	DeviceStatus  []DeviceStatus `json:"devices"`
 }
 
-func SetSingleStatusToRedis(status *ClassroomRedisStatus) {
+type DeviceRedisStatus struct {
+	DeviceId int `json:"device_id"`
+	Ping     int `json:"ping"`   // ping ms
+	Status   int `json:"status"` // 中控状态
+}
+
+func SetSingleClassroomStatusToRedis(status *ClassroomRedisStatus) {
 	ctx := context.Background()
 	marshal, _ := json.Marshal(status)
 
 	_, err := rdb.Set(ctx, fmt.Sprintf("c%d", status.ClassroomId), marshal, 0).Result()
 	if err != nil {
-		logBoth("%s when SetSingleStatusToRedis ClassroomId: %d", err, status.ClassroomId)
+		logBoth("%s when SetSingleClassroomStatusToRedis ClassroomId: %d", err, status.ClassroomId)
 	}
 }
 
-func GetSingleStatusFromRedis(classroomId int) *ClassroomRedisStatus {
+func GetSingleClassroomStatusFromRedis(classroomId int) *ClassroomRedisStatus {
 	ctx := context.Background()
 	res, err := rdb.Get(ctx, fmt.Sprintf("c%d", classroomId)).Result()
 	if err != nil {
-		logBoth("%s when GetSingleStatusFromRedis ClassroomId: %d", err, classroomId)
+		logBoth("%s when GetSingleClassroomStatusFromRedis ClassroomId: %d", err, classroomId)
 		return nil
 	}
 	var redisStatus ClassroomRedisStatus
 	json.Unmarshal([]byte(res), &redisStatus)
 	return &redisStatus
 }
-func SetAllStatusFromRedis(status []ClassroomRedisStatus) {
+
+func SetMultiClassroomStatusToRedis(status []ClassroomRedisStatus) {
 	ctx := context.Background()
 	var classes []string
 	for _, oneClass := range status {
@@ -49,11 +54,11 @@ func SetAllStatusFromRedis(status []ClassroomRedisStatus) {
 	}
 	_, err := rdb.MSet(ctx, classes).Result()
 	if err != nil {
-		logBoth("%s when SetAllStatusFromRedis", err)
+		logBoth("%s when SetMultiClassroomStatusToRedis", err)
 	}
 }
 
-func GetAllStatusFromRedis() []ClassroomRedisStatus {
+func GetAllClassroomStatusFromRedis() []ClassroomRedisStatus {
 	ctx := context.Background()
 	classrooms := getClassrooms()
 	var rooms []string
@@ -63,22 +68,87 @@ func GetAllStatusFromRedis() []ClassroomRedisStatus {
 
 	result, err := rdb.MGet(ctx, rooms...).Result()
 	if err != nil {
-		logBoth("%s when GetAllStatusFromRedis", err)
+		logBoth("%s when GetAllClassroomStatusFromRedis", err)
 	}
 
 	var redisStatusAll []ClassroomRedisStatus
 	for i, classroom := range result {
-		var redisStatus ClassroomRedisStatus
 		if classroom != nil {
-			fmt.Printf("%v\n", classroom)
+			var redisStatus ClassroomRedisStatus
 			err := json.Unmarshal([]byte(classroom.(string)), &redisStatus) // interface 转 string
 			if err != nil {
-				logBoth("%s when GetAllStatusFromRedis ClassroomId: %d", err, i+1)
+				logBoth("%s when GetAllClassroomStatusFromRedis ClassroomId: %d", err, i+1)
 				continue
 			}
 			redisStatusAll = append(redisStatusAll, redisStatus)
 		} else {
-			logBoth("GetAllStatusFromRedis return nil ClassroomId: %d", i+1)
+			logBoth("GetAllClassroomStatusFromRedis return nil ClassroomId: %d", i+1)
+		}
+	}
+	return redisStatusAll
+}
+
+func SetSingleDeviceStatusToRedis(status *DeviceRedisStatus) {
+	ctx := context.Background()
+	marshal, _ := json.Marshal(status)
+
+	_, err := rdb.Set(ctx, fmt.Sprintf("d%d", status.DeviceId), marshal, 0).Result()
+	if err != nil {
+		logBoth("%s when SetSingleDeviceStatusToRedis DeviceId: %d", err, status.DeviceId)
+	}
+}
+
+func GetSingleDeviceStatusFromRedis(deviceId int) *DeviceRedisStatus {
+	ctx := context.Background()
+	res, err := rdb.Get(ctx, fmt.Sprintf("d%d", deviceId)).Result()
+	if err != nil {
+		logBoth("%s when GetSingleDeviceStatusFromRedis DeviceId: %d", err, deviceId)
+		return nil
+	}
+	var redisStatus DeviceRedisStatus
+	json.Unmarshal([]byte(res), &redisStatus)
+	return &redisStatus
+}
+
+func SetMultiDeviceStatusToRedis(status []DeviceRedisStatus) {
+	ctx := context.Background()
+	var devices []string
+	for _, oneDevice := range status {
+		marshal, _ := json.Marshal(oneDevice)
+		devices = append(devices, fmt.Sprintf("d%d", oneDevice.DeviceId))
+		devices = append(devices, string(marshal))
+	}
+	_, err := rdb.MSet(ctx, devices).Result()
+	if err != nil {
+		logBoth("%s when SetMultiDeviceStatusToRedis", err)
+	}
+}
+
+func GetMultiDeviceStatusFromRedis(Ids []int) []DeviceRedisStatus {
+	ctx := context.Background()
+	var devs []string
+	for _, id := range Ids {
+		devs = append(devs, fmt.Sprintf("d%d", id))
+	}
+
+	result, err := rdb.MGet(ctx, devs...).Result()
+	if err != nil {
+		logBoth("%s when GetMultiDeviceStatusFromRedis", err)
+	}
+
+	var redisStatusAll []DeviceRedisStatus
+	for i, device := range result {
+		if device != nil {
+			var redisStatus DeviceRedisStatus
+			fmt.Printf("%v\n", device)
+			err := json.Unmarshal([]byte(device.(string)), &redisStatus) // interface 转 string
+			if err != nil {
+				logBoth("%s when GetMultiDeviceStatusFromRedis DeviceId: %d", err, i+1)
+				continue
+			}
+			redisStatusAll = append(redisStatusAll, redisStatus)
+		} else {
+			logBoth("GetMultiDeviceStatusFromRedis return nil DeviceId: %d", i+1)
 		}
 	}
 	return redisStatusAll
