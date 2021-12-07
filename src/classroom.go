@@ -177,35 +177,9 @@ func GetClassroomStatus(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	doneDevice := make(chan int)
-	doneController := make(chan DetectRes)
-	devices := getDevicesByClassId(classId)
-	var controllerIp string
-	for _, dev := range devices {
-		if dev.DeviceTypeId == 1 {
-			controllerIp = dev.DeviceIp
-			break
-		}
-	}
-	go pingDevices(devices, doneDevice)
-	go getControllerStatusSingle(controllerIp, 1, doneController)
+	fmt.Println(classId)
 	var classroomStatus ClassroomStatus
-	classroomStatus.Id = classId
-	var devStatus []DeviceStatus
-	controllerRes := <-doneController
-	if <-doneDevice == 1 {
-		for _, dev := range devices {
-			var devStat DeviceStatus
-			devStat.Status = dev.status
-			devStat.Ping = dev.pingRes
-			devStat.Id = dev.DeviceId
-			if dev.DeviceTypeId == 1 {
-				devStat.Status = controllerRes.res
-			}
-			devStatus = append(devStatus, devStat)
-		}
-	}
-	classroomStatus.DeviceStatus = devStatus
+	//classroomStatus.DeviceStatus = devStatus
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",

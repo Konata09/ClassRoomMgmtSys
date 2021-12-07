@@ -87,7 +87,7 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 		return
 	}
 	buf := make([]byte, 8)
-	err = pc.SetReadDeadline(time.Now().Add(time.Second * 1))
+	err = pc.SetReadDeadline(time.Now().Add(time.Second * 2))
 	if err != nil {
 		fmt.Printf("SetReadDeadline Fail %s", err)
 		return
@@ -155,9 +155,9 @@ func getControllersStatus(devices []Device, done chan int) {
 }
 
 /**
-  查询所有教室基本状态(中控 云盒 录直播) 并存储到 Redis
+  更新所有教室基本状态(中控 云盒 录直播) 并存储到 Redis
 */
-func getAllClassroomStatus() {
+func fetchAllClassroomStatus() {
 	classrooms := getClassrooms()
 	done := make(chan int)
 	lindges := getClassroomLindges()
@@ -190,8 +190,8 @@ func getAllClassroomStatus() {
 	for _, reserve := range liveStatus {
 		if strings.Contains(reserve.RoomName, "1-") {
 			ZhuLouNum := strings.Replace(reserve.RoomName, "1-", "", 1)
-			for i, classroom := range classrooms {
-				if classroom.Name == ZhuLouNum && strings.Contains(classroom.GroupName, "主教学楼") {
+			for i, _ := range classrooms {
+				if classrooms[i].Name == ZhuLouNum && strings.Contains(classrooms[i].GroupName, "主教学楼") {
 					classrooms[i].Live = reserve.IsLive != 0
 					classrooms[i].Rec = reserve.IsRecordFile != 0 && reserve.IsAutoPublish != 0
 					classrooms[i].CourseName = reserve.Name
@@ -201,8 +201,8 @@ func getAllClassroomStatus() {
 			}
 		} else if strings.Contains(reserve.RoomName, "3-") {
 			DongLouNum := strings.Replace(reserve.RoomName, "3-", "", 1)
-			for i, classroom := range classrooms {
-				if classroom.Name == DongLouNum && strings.Contains(classroom.GroupName, "东办公楼") {
+			for i, _ := range classrooms {
+				if classrooms[i].Name == DongLouNum && strings.Contains(classrooms[i].GroupName, "东办公楼") {
 					classrooms[i].Live = reserve.IsLive != 0
 					classrooms[i].Rec = reserve.IsRecordFile != 0 && reserve.IsAutoPublish != 0
 					classrooms[i].CourseName = reserve.Name
@@ -212,8 +212,8 @@ func getAllClassroomStatus() {
 			}
 		} else if strings.Contains(reserve.RoomName, "图") {
 			TuShuGuanNum := strings.Replace(strings.Replace(strings.Replace(strings.Replace(reserve.RoomName, "图书馆（济南）-图", "合班教室", 1), "一", "1", 1), "二", "2", 1), "三", "3", 1)
-			for i, classroom := range classrooms {
-				if classroom.Name == TuShuGuanNum {
+			for i, _ := range classrooms {
+				if classrooms[i].Name == TuShuGuanNum {
 					classrooms[i].Live = reserve.IsLive != 0
 					classrooms[i].Rec = reserve.IsRecordFile != 0 && reserve.IsAutoPublish != 0
 					classrooms[i].CourseName = reserve.Name
@@ -223,18 +223,61 @@ func getAllClassroomStatus() {
 			}
 		}
 	}
-	var redisStatuses []ClassroomRedisStatus
+	redisStatuses := GetAllClassroomStatusFromRedis() // 先读出旧数据 再覆盖新数据
 	for _, classroom := range classrooms {
-		var redisStatus ClassroomRedisStatus
-		redisStatus.ClassroomId = classroom.Id
-		redisStatus.ClassroomName = classroom.Name
-		redisStatus.CourseName = classroom.CourseName
-		redisStatus.TeacherName = classroom.TeacherName
-		redisStatus.Lindge = classroom.Lindge
-		redisStatus.Controller = classroom.Controller
-		redisStatus.IsLive = b2i(classroom.Live)
-		redisStatus.IsRecord = b2i(classroom.Rec)
-		redisStatuses = append(redisStatuses, redisStatus)
+		for i, _ := range redisStatuses {
+			if redisStatuses[i].ClassroomId == classroom.Id {
+				redisStatuses[i].ClassroomName = classroom.Name
+				redisStatuses[i].CourseName = classroom.CourseName
+				redisStatuses[i].TeacherName = classroom.TeacherName
+				redisStatuses[i].Lindge = classroom.Lindge
+				redisStatuses[i].Controller = classroom.Controller
+				redisStatuses[i].IsLive = b2i(classroom.Live)
+				redisStatuses[i].IsRecord = b2i(classroom.Rec)
+				break
+			}
+		}
 	}
 	SetMultiClassroomStatusToRedis(redisStatuses)
+}
+
+/**
+  更新单个教室的设备状态并存储到 Redis
+*/
+func fetchSingleClassroomStatus(classId int) {
+	doneDevice := make(chan int)
+	doneController := make(chan DetectRes)
+	devices := getDevicesByClassId(classId)
+	var controllerIp string
+	for _, dev := range devices {
+		if dev.DeviceTypeId == 1 {
+			controllerIp = dev.DeviceIp
+			break
+		}
+	}
+	go pingDevices(devices, doneDevice)
+	go getControllerStatusSingle(controllerIp, 1, doneController)
+	var classroomStatus ClassroomStatus
+	classroomStatus.Id = classId
+	var devStatus []DeviceStatus
+	redis := GetSingleClassroomStatusFromRedis(classId) // 读取旧数据
+	controllerRes := <-doneController
+	redis.Controller = controllerRes.res
+	if <-doneDevice == 1 {
+		for _, dev := range devices {
+			var devStat DeviceStatus
+			devStat.Status = dev.status
+			devStat.Ping = dev.pingRes
+			devStat.Id = dev.DeviceId
+			if dev.DeviceTypeId == 1 { // 中控
+				devStat.Status = controllerRes.res
+			} else if dev.DeviceTypeId == 2 { // 云盒
+				redis.Lindge = dev.pingRes
+			}
+			devStatus = append(devStatus, devStat)
+		}
+	}
+	redis.DeviceStatus = devStatus
+	fmt.Printf("devS: %v", devStatus)
+	SetSingleClassroomStatusToRedis(redis)
 }
