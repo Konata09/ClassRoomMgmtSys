@@ -25,6 +25,7 @@ type AllClassroom struct {
 	Count      int         `json:"count"`
 	Classrooms []Classroom `json:"classrooms"`
 }
+
 type Camera struct {
 	DeviceId  int    `json:"device_id"`
 	Name      string `json:"name"`
@@ -68,6 +69,8 @@ func GetClassrooms(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+
+	// Deprecated
 	//var enPing = true
 	//ParamPing := r.URL.Query().Get("ping")
 	//if ParamPing == "false" {

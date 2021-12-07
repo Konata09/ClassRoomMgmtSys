@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/text/encoding/simplifiedchinese"
+	"math/rand"
 	strconv "strconv"
 	"strings"
+	"time"
 )
 
 var salt = "ustsdnicm3002"
@@ -119,4 +121,9 @@ func b2i(b bool) int {
 		return 1
 	}
 	return 0
+}
+
+func getRandomInt(min int, max int) int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(max-min+1) + min
 }

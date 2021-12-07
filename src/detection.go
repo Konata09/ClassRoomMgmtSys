@@ -16,6 +16,7 @@ type DetectRes struct {
 var controllerQueryPayload = []byte("\x4c\x69\x67\x68\x74\x6f\x6e\xfe\x08\x14\x0a\x00\x26\xff")
 
 func pingSingle(ip string, id int, c chan DetectRes) {
+	time.Sleep(time.Duration(getRandomInt(0, 1000)) * time.Millisecond) // 0-1秒随机延时
 	var pingres DetectRes
 	pingres.id = id
 	pinger, err := ping.NewPinger(ip)
@@ -26,7 +27,7 @@ func pingSingle(ip string, id int, c chan DetectRes) {
 		return
 	}
 	pinger.Timeout = time.Second * 2
-	pinger.Count = 1
+	pinger.Count = 3
 	err = pinger.Run() // Blocks until finished.
 	if err != nil {
 		fmt.Printf("%s when ping to %s\n", err, ip)
@@ -59,12 +60,13 @@ func pingDevices(devices []Device, done chan int) {
 }
 
 func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
+	time.Sleep(time.Duration(getRandomInt(0, 1000)) * time.Millisecond) // 0-1秒随机延时
 	var pingres DetectRes
 	pingres.id = id
 
 	pc, err := net.ListenUDP("udp4", nil)
 	if err != nil {
-		logBoth("[ERR] %s when getControollerStatus ListenUDP from %s", err, ip)
+		logBoth("[ERR] %s when getControllerStatus ListenUDP from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
@@ -72,14 +74,14 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 	defer pc.Close()
 	addr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", ip, 4001))
 	if err != nil {
-		logBoth("[ERR] %s when getControollerStatus ResolveUDPAddr from %s", err, ip)
+		logBoth("[ERR] %s when getControllerStatus ResolveUDPAddr from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
 	}
 	_, err = pc.WriteTo(controllerQueryPayload, addr)
 	if err != nil {
-		logBoth("[ERR] %s when getControollerStatus WriteTo from %s", err, ip)
+		logBoth("[ERR] %s when getControllerStatus WriteTo from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
@@ -92,7 +94,7 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 	}
 	_, _, err = pc.ReadFrom(buf)
 	if err != nil {
-		logBoth("[ERR] %s when getControollerStatus ReadFrom from %s", err, ip)
+		logBoth("[ERR] %s when getControllerStatus ReadFrom from %s", err, ip)
 		pingres.res = -1
 		c <- pingres
 		return
@@ -103,7 +105,7 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 		1 ON
 		2 OFF
 		3 WAIT
-		4 Unkonw
+		4 Unkonwn
 	*/
 	if buf[4] == '\x12' && buf[5] == '\x70' {
 		pingres.res = 1
