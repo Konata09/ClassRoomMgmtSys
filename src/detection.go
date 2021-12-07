@@ -153,7 +153,7 @@ func getControllersStatus(devices []Device, done chan int) {
 }
 
 /**
-  查询所有教室基本状态(中控 云盒 录直播)
+  查询所有教室基本状态(中控 云盒 录直播) 并存储到 Redis
 */
 func getAllClassroomStatus() {
 	classrooms := getClassrooms()
@@ -197,7 +197,6 @@ func getAllClassroomStatus() {
 					break
 				}
 			}
-			fmt.Printf("rec: %v\n",classrooms)
 		} else if strings.Contains(reserve.RoomName, "3-") {
 			DongLouNum := strings.Replace(reserve.RoomName, "3-", "", 1)
 			for i, classroom := range classrooms {
@@ -229,6 +228,8 @@ func getAllClassroomStatus() {
 		redisStatus.ClassroomName = classroom.Name
 		redisStatus.CourseName = classroom.CourseName
 		redisStatus.TeacherName = classroom.TeacherName
+		redisStatus.Lindge = classroom.Lindge
+		redisStatus.Controller = classroom.Controller
 		redisStatus.IsLive = b2i(classroom.Live)
 		redisStatus.IsRecord = b2i(classroom.Rec)
 		redisStatuses = append(redisStatuses, redisStatus)

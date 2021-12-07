@@ -13,13 +13,15 @@ type ClassroomRedisStatus struct {
 	TeacherName   string         `json:"teacher_name"`   // 教师姓名
 	IsLive        int            `json:"is_live"`        // 是否直播
 	IsRecord      int            `json:"is_record"`      // 是否录制及自动发布
-	DeviceStatus  []DeviceStatus `json:"devices"`
+	Lindge        int            `json:"lindge"`         // 云盒状态
+	Controller    int            `json:"controller"`     // 中控状态
+	DeviceStatus  []DeviceStatus `json:"devices"`        // 所有设备
 }
 
 type DeviceRedisStatus struct {
 	DeviceId int `json:"device_id"`
 	Ping     int `json:"ping"`   // ping ms
-	Status   int `json:"status"` // 中控状态
+	Status   int `json:"status"` // 中控状态 Deprecated
 }
 
 func SetSingleClassroomStatusToRedis(status *ClassroomRedisStatus) {
