@@ -16,7 +16,7 @@ type DetectRes struct {
 var controllerQueryPayload = []byte("\x4c\x69\x67\x68\x74\x6f\x6e\xfe\x08\x14\x0a\x00\x26\xff")
 
 func pingSingle(ip string, id int, c chan DetectRes) {
-	time.Sleep(time.Duration(getRandomInt(0, 1000)) * time.Millisecond) // 0-1秒随机延时
+	time.Sleep(time.Duration(getRandomInt(0, 300)) * time.Millisecond) // 0-1秒随机延时
 	var pingres DetectRes
 	pingres.id = id
 	pinger, err := ping.NewPinger(ip)
@@ -60,7 +60,7 @@ func pingDevices(devices []Device, done chan int) {
 }
 
 func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
-	time.Sleep(time.Duration(getRandomInt(0, 1000)) * time.Millisecond) // 0-1秒随机延时
+	time.Sleep(time.Duration(getRandomInt(0, 300)) * time.Millisecond) // 0-1秒随机延时
 	var pingres DetectRes
 	pingres.id = id
 
@@ -244,7 +244,7 @@ func fetchAllClassroomStatus() {
 /**
   更新单个教室的设备状态并存储到 Redis
 */
-func fetchSingleClassroomStatus(classId int) {
+func fetchSingleClassroomDeviceStatus(classId int) {
 	doneDevice := make(chan int)
 	doneController := make(chan DetectRes)
 	devices := getDevicesByClassId(classId)
@@ -278,6 +278,15 @@ func fetchSingleClassroomStatus(classId int) {
 		}
 	}
 	redis.DeviceStatus = devStatus
-	fmt.Printf("devS: %v", devStatus)
 	SetSingleClassroomStatusToRedis(redis)
+}
+
+/**
+  更新所有教室的所有设备状态
+*/
+func fetchAllClassroomDeviceStatus() {
+	classrooms := getClassrooms()
+	for i := range classrooms {
+		fetchSingleClassroomDeviceStatus(classrooms[i].Id)
+	}
 }

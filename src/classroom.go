@@ -84,8 +84,8 @@ func GetClassrooms(w http.ResponseWriter, r *http.Request) {
 			if classroom.Id == redisClass.ClassroomId {
 				classrooms[i].Lindge = redisClass.Lindge
 				classrooms[i].Controller = redisClass.Controller
-				classrooms[i].Rec = redisClass.IsRecord != 1
-				classrooms[i].Live = redisClass.IsLive != 1
+				classrooms[i].Rec = redisClass.IsRecord != 0
+				classrooms[i].Live = redisClass.IsLive != 0
 				classrooms[i].TeacherName = redisClass.TeacherName
 				classrooms[i].CourseName = redisClass.CourseName
 				break
@@ -177,9 +177,11 @@ func GetClassroomStatus(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Println(classId)
+	redis := GetSingleClassroomStatusFromRedis(classId)
 	var classroomStatus ClassroomStatus
-	//classroomStatus.DeviceStatus = devStatus
+	classroomStatus.DeviceStatus = redis.DeviceStatus
+	classroomStatus.Live = redis.IsLive != 0
+	classroomStatus.Rec = redis.IsRecord != 0
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",
