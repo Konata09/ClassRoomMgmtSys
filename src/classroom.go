@@ -49,6 +49,8 @@ type ClassroomStatus struct {
 	Id           int
 	Rec          bool
 	Live         bool
+	CourseName   string
+	TeacherName  string
 	DeviceStatus []DeviceStatus
 }
 
@@ -183,6 +185,8 @@ func GetClassroomStatus(w http.ResponseWriter, r *http.Request) {
 	classroomStatus.DeviceStatus = redis.DeviceStatus
 	classroomStatus.Live = redis.IsLive != 0
 	classroomStatus.Rec = redis.IsRecord != 0
+	classroomStatus.CourseName = redis.CourseName
+	classroomStatus.TeacherName = redis.TeacherName
 	json.NewEncoder(w).Encode(&ApiReturn{
 		Retcode: 0,
 		Message: "OK",

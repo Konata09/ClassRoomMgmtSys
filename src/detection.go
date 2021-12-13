@@ -118,6 +118,8 @@ func getControllerStatusSingle(ip string, id int, c chan DetectRes) {
 		pingres.res = 2
 	} else if buf[4] == '\x10' {
 		pingres.res = 2
+	} else if buf[4] == '\x40' {
+		pingres.res = 2
 	} else if buf[4] == '\x03' {
 		pingres.res = 3
 	} else {
