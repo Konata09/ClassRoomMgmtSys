@@ -186,7 +186,7 @@ func SetTicketDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := GetUserInfoFromJWT(r)
-	ret := setTicketDone(ticket.Id, ticket.Status, user.Uid, time.Now().Format("2006-01-02 15:04"))
+	ret := setTicketDone(ticket.Id, ticket.Status, user.Uid, time.Now().Format("2006-01-02 15:04"), ticket.CompleteDetail)
 	if ret {
 		ApiOk(w)
 		return

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"log/syslog"
 	"net/http"
@@ -19,10 +20,18 @@ var rdb *redis.Client
 
 func initDBConn() {
 	var err error
-	db, err = sql.Open("sqlite3", "db.db?cache=shared&mode=wrc")
+	db, err = sql.Open("mysql", "root:@unix(/var/lib/mysql/mysql.sock)/classroom_mgmt")
 	if err != nil {
 		log.Fatal(err)
 	}
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	//db, err = sql.Open("sqlite3", "db.db?cache=shared&mode=wrc")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	if db == nil {
 		log.Fatal("[ERR] Error open database.")
 	}

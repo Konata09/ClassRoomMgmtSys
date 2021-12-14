@@ -13,6 +13,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-co-op/gocron v1.11.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.4 // indirect
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect

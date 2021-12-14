@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/google/uuid"
 	"reflect"
+	"runtime/debug"
 	"strings"
 )
 
@@ -10,12 +11,16 @@ func getUidByUsernameAndPassword(username string, password string) int {
 	passwordMD5 := getPasswordMD5(password)
 	stmt, err := db.Prepare("select uid from user where username = ? and password = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	defer stmt.Close()
 	var uid int
 	err = stmt.QueryRow(username, passwordMD5).Scan(&uid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	return uid
@@ -24,12 +29,16 @@ func getUidByUsernameAndPassword(username string, password string) int {
 func getUidByUsername(username string) int {
 	stmt, err := db.Prepare("select uid from user where username = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	defer stmt.Close()
 	var uid int
 	err = stmt.QueryRow(username).Scan(&uid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	return uid
@@ -38,12 +47,16 @@ func getUidByUsername(username string) int {
 func getPhoneByUid(uid int) int {
 	stmt, err := db.Prepare("select phone from user where uid = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	defer stmt.Close()
 	var phone int
 	err = stmt.QueryRow(uid).Scan(&phone)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	return phone
@@ -51,11 +64,15 @@ func getPhoneByUid(uid int) int {
 func setPhoneByUid(uid int, phone int) bool {
 	stmt, err := db.Prepare("update user set phone = ? where uid = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	res, err := stmt.Exec(phone, uid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	affected, _ := res.RowsAffected()
@@ -65,13 +82,15 @@ func setPhoneByUid(uid int, phone int) bool {
 func getRoleByUid(uid int) *Role {
 	stmt, err := db.Prepare("select rolename, isadmin, isstaff from user,role where uid = ? and user.roleid = role.roleid")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	var role Role
 	err = stmt.QueryRow(uid).Scan(&role.Rolename, &role.Isadmin, &role.Isstaff)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	return &role
 }
@@ -79,12 +98,16 @@ func getRoleByUid(uid int) *Role {
 func getRoleidByRolename(rolename string) int {
 	stmt, err := db.Prepare("select roleid from role where rolename = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	var roleid int
 	defer stmt.Close()
 	err = stmt.QueryRow(rolename).Scan(&roleid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return -1
 	}
 	return roleid
@@ -107,11 +130,15 @@ func getPasswordByUid(uid int) (res string, err error) {
 func setPasswordByUid(uid int, newPassword string) bool {
 	stmt, err := db.Prepare("update user set password = ? where uid = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(newPassword, uid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -120,13 +147,15 @@ func setPasswordByUid(uid int, newPassword string) bool {
 func getUserByUid(uid int) *User {
 	stmt, err := db.Prepare("select username, rolename, isadmin, isstaff from user,role where user.roleid = role.roleid and uid = ?")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	var user User
 	err = stmt.QueryRow(uid).Scan(&user.Username, &user.Rolename, &user.Isadmin, &user.Isstaff)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	return &user
 }
@@ -134,12 +163,14 @@ func getUserByUid(uid int) *User {
 func getUsers() []User {
 	stmt, err := db.Prepare("select uid, username, rolename, isadmin, isstaff, phone from user,role where user.roleid = role.roleid")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var users []User
 	for rows.Next() {
@@ -153,11 +184,15 @@ func getUsers() []User {
 func addUser(username string, password string, phone int, roleid int) bool {
 	stmt, err := db.Prepare("insert into user (username, password, phone, roleid) values (?, ?, ?, ?)")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(username, password, phone, roleid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -166,11 +201,15 @@ func addUser(username string, password string, phone int, roleid int) bool {
 func deleteUser(uid int) bool {
 	stmt, err := db.Prepare("delete from user where uid = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(uid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -179,12 +218,14 @@ func deleteUser(uid int) bool {
 func getUserCommands() []UserCommand {
 	stmt, err := db.Prepare("select id, name from command")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var commands []UserCommand
 	for rows.Next() {
@@ -198,12 +239,14 @@ func getUserCommands() []UserCommand {
 func getCommands() []Command {
 	stmt, err := db.Prepare("select id, name, value, port from command")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var commands []Command
 	for rows.Next() {
@@ -217,13 +260,15 @@ func getCommands() []Command {
 func getCommandById(commandId int) *Command {
 	stmt, err := db.Prepare("select name, value, port from command where id = ?")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	var command Command
 	err = stmt.QueryRow(commandId).Scan(&command.CommandName, &command.CommandValue, &command.CommandPort)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	return &command
 }
@@ -231,6 +276,8 @@ func getCommandById(commandId int) *Command {
 func addCommand(commands []Command) bool {
 	stmt, err := db.Prepare("insert into command (name, value, port) values (?, ?, ?)")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
@@ -246,11 +293,15 @@ func addCommand(commands []Command) bool {
 func deleteCommand(commandId int) bool {
 	stmt, err := db.Prepare("delete from command where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(commandId)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -259,11 +310,15 @@ func deleteCommand(commandId int) bool {
 func setCommand(commandId int, commandName string, commandValue string, commandPort int) bool {
 	stmt, err := db.Prepare("update command set name = ?, value = ?, port = ? where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(commandName, trimCommandToStor(commandValue), commandPort, commandId)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -272,12 +327,14 @@ func setCommand(commandId int, commandName string, commandValue string, commandP
 func getDevices() []Device {
 	stmt, err := db.Prepare("select device.id, name, ip, mac, typeid, classid from device, devicetype where device.typeid = devicetype.id")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var devices []Device
 	for rows.Next() {
@@ -292,12 +349,14 @@ func getDevices() []Device {
 func getUserDevices() []UserDevice {
 	stmt, err := db.Prepare("select device.id, name from device, devicetype where typeid = devicetype.id")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var devices []UserDevice
 	for rows.Next() {
@@ -311,13 +370,15 @@ func getUserDevices() []UserDevice {
 func getDeviceById(deviceId int) *Device {
 	stmt, err := db.Prepare("select name, ip, mac, typeid, classid from device, devicetype where device.typeid = devicetype.id and device.id = ?")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	var device Device
 	err = stmt.QueryRow(deviceId).Scan(&device.DeviceName, &device.DeviceIp, &device.DeviceMac, &device.DeviceTypeId, &device.DeviceClassId)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	device.DeviceMac = trimMACtoShow(device.DeviceMac)
 	return &device
@@ -326,12 +387,14 @@ func getDeviceById(deviceId int) *Device {
 func getDevicesByClassId(classId int) []Device {
 	stmt, err := db.Prepare("select device.id, name, ip, mac, typeid, classid from device, devicetype where device.typeid = devicetype.id and device.classid = ?")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query(classId)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var devices []Device
 	for rows.Next() {
@@ -346,6 +409,8 @@ func getDevicesByClassId(classId int) []Device {
 func addDevice(devices []Device) bool {
 	stmt, err := db.Prepare("insert into device (ip, mac, typeid, classid) values (?, ?, ?, ?)")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
@@ -364,11 +429,15 @@ func addDevice(devices []Device) bool {
 func deleteDevice(deviceId int) bool {
 	stmt, err := db.Prepare("delete from device where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(deviceId)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -377,11 +446,15 @@ func deleteDevice(deviceId int) bool {
 func setDevice(deviceId int, deviceIp string, deviceMac string, deviceTypeId int, deviceClassId int) bool {
 	stmt, err := db.Prepare("update device set ip = ?, mac = ?, typeid = ?, classid = ? where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	res, err := stmt.Exec(deviceIp, trimMACtoStor(deviceMac), deviceTypeId, deviceClassId, deviceId)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	affected, _ := res.RowsAffected()
@@ -391,12 +464,14 @@ func setDevice(deviceId int, deviceIp string, deviceMac string, deviceTypeId int
 func getClassrooms() []Classroom {
 	stmt, err := db.Prepare("select classroom.id, classroom.name, classroomgroup.id, classroomgroup.name from classroom,classroomgroup where classroom.groupid = classroomgroup.id")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	rows, err := stmt.Query()
 	defer stmt.Close()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var classrooms []Classroom
 	for rows.Next() {
@@ -410,13 +485,15 @@ func getClassrooms() []Classroom {
 func getClassroom(id int) *ClassroomDetail {
 	stmt, err := db.Prepare("select classroom.id, classroom.name, classroomgroup.id, classroomgroup.name from classroom,classroomgroup where classroom.groupid = classroomgroup.id and classroom.id = ?")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	var classroomDetail ClassroomDetail
 	err = stmt.QueryRow(id).Scan(&classroomDetail.Id, &classroomDetail.Name, &classroomDetail.GroupId, &classroomDetail.GroupName)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	classroomDetail.Devices = getDevicesByClassId(id)
 	return &classroomDetail
@@ -425,12 +502,14 @@ func getClassroom(id int) *ClassroomDetail {
 func getClassroomControllers() []Device {
 	stmt, err := db.Prepare("select id, ip, mac, classid, typeid from device where typeid = 1")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var devices []Device
 	for rows.Next() {
@@ -444,12 +523,14 @@ func getClassroomControllers() []Device {
 func getClassroomLindges() []Device {
 	stmt, err := db.Prepare("select id, ip, mac, classid, typeid from device where typeid = 2")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var devices []Device
 	for rows.Next() {
@@ -463,24 +544,32 @@ func getClassroomLindges() []Device {
 func setClassroom(id int, name string, groupid int) bool {
 	stmt, err := db.Prepare("update classroom set name = ?, groupid = ? where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(name, groupid, id)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
 }
 
 func addTicket(title string, detail string, severity int, place string, createUser int, dutyUser1 int, dutyUser2 int, dutyUser3 int, createTime string, startTime string) bool {
-	stmt, err := db.Prepare("insert into ticket(title, detail, severity, place, createuser, dutyuser1, dutyuser2, dutyuser3, createtime, starttime, completetime, completeuser,completedetail) values (?,?,?,?,?,?,?,?,?,?,'',0,'')")
+	stmt, err := db.Prepare("insert into ticket(title, detail, severity, place, createuser, dutyuser1, dutyuser2, dutyuser3, createtime, starttime, completetime, completeuser,completedetail) values (?,?,?,?,?,?,?,?,?,?,null,null,'')")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(title, detail, severity, place, createUser, dutyUser1, dutyUser2, dutyUser3, createTime, startTime)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -489,12 +578,14 @@ func addTicket(title string, detail string, severity int, place string, createUs
 func getTickets(limit int) []TicketOverview {
 	stmt, err := db.Prepare("select id, title, severity, status,place, createuser, username from ticket, user where createuser = uid order by id desc limit ?")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query(limit)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var ticketOverviews []TicketOverview
 	for rows.Next() {
@@ -508,13 +599,15 @@ func getTickets(limit int) []TicketOverview {
 func getTicket(id int) *Ticket {
 	stmt, err := db.Prepare("select ticket.id, title, detail, severity, status, place, createuser, dutyuser1, dutyuser2, dutyuser3, completeuser, createtime, starttime, completetime, completedetail from ticket where ticket.id = ? ")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var ticket Ticket
 	defer stmt.Close()
 	err = stmt.QueryRow(id).Scan(&ticket.Id, &ticket.Title, &ticket.Detail, &ticket.Severity, &ticket.Status, &ticket.Place, &ticket.CreateUser, &ticket.DutyUser1, &ticket.DutyUser2, &ticket.DutyUser3, &ticket.CompleteUser, &ticket.CreateTime, &ticket.StartTime, &ticket.CompleteTime, &ticket.CompleteDetail)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	ticket.CreateUserName = getUserByUid(ticket.CreateUser).Username
 	if ticket.DutyUser1 != 0 {
@@ -535,12 +628,14 @@ func getTicket(id int) *Ticket {
 func getUserDutyTicketOverview(id int) []TicketOverview {
 	stmt, err := db.Prepare("select ticket.id, title, severity, status,place, createuser, username from ticket, user where (dutyuser1 = ? or dutyuser2 = ? or dutyuser3 = ?) and createuser = user.uid")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	rows, err := stmt.Query(id, id, id)
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	var ticketOverviews []TicketOverview
 	for rows.Next() {
@@ -551,14 +646,18 @@ func getUserDutyTicketOverview(id int) []TicketOverview {
 	return ticketOverviews
 }
 
-func setTicketDone(id int, status int, user int, time string) bool {
-	stmt, err := db.Prepare("update ticket set status = ? , completeuser = ? , completetime = ? where id = ?")
+func setTicketDone(id int, status int, user int, time string, detail string) bool {
+	stmt, err := db.Prepare("update ticket set status = ? , completeuser = ? , completetime = ?, completedetail = ? where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(status, user, time, id)
+	_, err = stmt.Exec(status, user, time, detail, id)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -567,11 +666,15 @@ func setTicketDone(id int, status int, user int, time string) bool {
 func setTicketDutyUser(id int, dutyUser1 int, dutyUser2 int, dutyUser3 int) bool {
 	stmt, err := db.Prepare("update ticket set dutyuser1 = ?, dutyuser2 = ?, dutyuser3 = ? where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(dutyUser1, dutyUser2, dutyUser3, id)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -580,11 +683,15 @@ func setTicketDutyUser(id int, dutyUser1 int, dutyUser2 int, dutyUser3 int) bool
 func deleteTicket(id int) bool {
 	stmt, err := db.Prepare("delete from ticket where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(id)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -593,13 +700,15 @@ func deleteTicket(id int) bool {
 func getDutyCalender() *DutyCalender {
 	stmt, err := db.Prepare("select id, user.uid, day, username from duty_v3, user where duty_v3.uid = user.uid")
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	defer stmt.Close()
 	var dutyCalender DutyCalender
 	rows, err := stmt.Query()
 	if err != nil {
-		return nil
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 	}
 	for rows.Next() {
 		var dutyUser DutyUser
@@ -628,11 +737,15 @@ func getDutyCalender() *DutyCalender {
 func addDutyCalender(day string, uid int) bool {
 	stmt, err := db.Prepare("insert into duty_v3 (id, day, uid) values (?, ?, ?)")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(strings.Replace(uuid.NewString(), "-", "", -1), day, uid)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -641,11 +754,15 @@ func addDutyCalender(day string, uid int) bool {
 func updateDutyCalender(day string, uid int, id string) bool {
 	stmt, err := db.Prepare("update duty_v3 set day = ?, uid = ? where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(day, uid, id)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -654,10 +771,14 @@ func updateDutyCalender(day string, uid int, id string) bool {
 func delDutyCalender(id string) bool {
 	stmt, err := db.Prepare("delete from duty_v3 where id = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	_, err = stmt.Exec(id)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
@@ -666,11 +787,15 @@ func delDutyCalender(id string) bool {
 func getPreference(name string, value *string) bool {
 	stmt, err := db.Prepare("select value from preferences where name = ?")
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(name).Scan(value)
 	if err != nil {
+		logBoth("[ERR] %s", err)
+		debug.PrintStack()
 		return false
 	}
 	return true
